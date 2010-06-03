@@ -21,7 +21,7 @@ h1 {
   text-shadow: 3px 3px #CCC;
 }
 
-h1.main_title {
+body > ol > li:first-child h1 {
 	font-size: 4em;
 	margin-top: 110px;
 	margin-bottom: 40px;
@@ -57,7 +57,7 @@ body > ol {
 body > ol > li {
   position: absolute;
   width: 100%;
-  height: 550px;
+  height: 525px;
   margin: 0;
   padding: 0 0 0 0px;
   
@@ -85,6 +85,12 @@ body > ol > li.done {
 }
 body > ol > li > * {
  margin-left: 10px;
+text-align: center;
+}
+
+body > ol > li > img {
+	display: block;
+	margin: auto;
 }
 
 ul {
@@ -108,10 +114,4 @@ code {
   padding: 20px;
   background: #333;
   color: white;
-}
-
-.middle {
-	display: block;
-	margin: auto;
-	text-align: center;
 }

@@ -3,6 +3,7 @@ var unlocked_state = false;
 
 var LEFT_KEY_CODE = 37;
 var RIGHT_KEY_CODE = 39;
+var P_KEY_CODE = 80;
 
 function nextSlide(event) {
   if(slide_index >= slide_count-1) return false;
@@ -31,8 +32,6 @@ function showPageCounter() {
 }
 
 function thatSlide(index, randomize_pending, from_remote) {
-
-  
   // Set everyone else's to the same
   if(!from_remote) {
 	var slide_url = "/goto/"+index;
@@ -100,15 +99,16 @@ $(document).ready(function() {
   // Listen to keypresses
   $("body").keyup(function(event) {
     event.preventDefault();
+
     if(event.keyCode == LEFT_KEY_CODE) prevSlide();
     if(event.keyCode == RIGHT_KEY_CODE) nextSlide();
+	if(event.keyCode == P_KEY_CODE) toggleUnlockEntry();
   });
   
   // Create the status readout
   $("body").prepend('<section class="page_counter"></section>');
-  $("body").prepend('<section id="unlock_entry"><input id="unlock_code" type="text" value="" /></section>');
+  $("body").prepend('<section id="unlock_entry" style="display: none;"><input id="unlock_code" type="text" value="" /></section>');
   
   // Set to slide zero
   thatSlide(0, true, true);
-  
 });
