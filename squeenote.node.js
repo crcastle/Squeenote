@@ -4,6 +4,9 @@ var sys = require('sys'),
     fs = require('fs'),
 	path = require('path');
 
+// TODO the unlock passcode should be an argument given when starting the node app
+// TODO the presentation being served at the root path should be an argument given when starting the node app (default to index.html)
+
 var slide_index = 0;
 var unlock_passcode = "bling-bling";
    
@@ -60,7 +63,7 @@ sys.puts("unlock: "+unlock+" "+unlock_passcode);
     
     res.writeHead(200, {});
 
-    fs.readFile("."+r_info.href, function(error, data) {
+    fs.readFile("./public"+r_info.href, function(error, data) {
       if(error) sys.puts(sys.inspect(error));
       res.write(data);
       res.end();
