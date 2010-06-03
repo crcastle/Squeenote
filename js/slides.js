@@ -33,7 +33,7 @@ function showPageCounter() {
 function thatSlide(index, randomize_pending, from_remote) {
   var i=0;
   
-  slide_index = index;
+ 
   // Set page counter content
   showPageCounter();
   
@@ -46,8 +46,11 @@ function thatSlide(index, randomize_pending, from_remote) {
 		slide_url += "?unlock="+unlock_code;
 	}
 	
-    $.get(slide_url, function() {
+    $.getJSON(slide_url, function(data, textStatus) {
+		 slide_index = data.slide_index;
     });
+  } else {
+	 slide_index = index;
   }
   
   $("body > ol > li").each(function() {

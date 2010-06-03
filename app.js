@@ -47,10 +47,10 @@ sys.puts("unlock: "+unlock+" "+unlock_passcode);
 	      segs = r_info.href.substr(6,5);
 	      pr_slide_num = slide_index;
 	      slide_index = segs;
-	      res.writeHead(200, {'Content-Type': 'text/plain'});
-	      res.write("Set slide from "+pr_slide_num+" to "+slide_index);
-	      res.end();
 		}
+	      res.writeHead(200, {"Content-Type": "application/json"});
+		  res.write("{\"previous_slide\": "+pr_slide_num+", \"slide_index\": "+slide_index+"}");
+	      res.end();
   } else {
     // Serve static file
     sys.puts("Serving static file");
