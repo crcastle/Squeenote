@@ -41,11 +41,13 @@ sys.puts("unlock: "+unlock+" "+unlock_passcode);
       res.end();
   } else if(r_info.pathname.indexOf("/goto") == 0) {
 	sys.puts("Trying to set slide num... "+r_info.href);
+		pr_slide_num = slide_index;
+		
 		if (unlock_master == true) {
 	      sys.puts("Setting slide num... "+r_info.href);
 	      // Increment page value for inc requests
 	      segs = r_info.href.substr(6,5);
-	      pr_slide_num = slide_index;
+	      
 	      slide_index = segs;
 		}
 	      res.writeHead(200, {"Content-Type": "application/json"});
