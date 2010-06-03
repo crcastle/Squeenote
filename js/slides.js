@@ -39,7 +39,7 @@ function thatSlide(index, randomize_pending, from_remote) {
   
   // Set everyone else's to the same
   if(!from_remote) {
-	var slide_url = "/goto/"+slide_index;
+	var slide_url = "/goto/"+index;
 	var unlock_code = $("#unlock_code").val();
 	
 	if (unlock_code != null && unlock_code != "") {
