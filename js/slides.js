@@ -31,11 +31,7 @@ function showPageCounter() {
 }
 
 function thatSlide(index, randomize_pending, from_remote) {
-  var i=0;
-  
- 
-  // Set page counter content
-  showPageCounter();
+
   
   // Set everyone else's to the same
   if(!from_remote) {
@@ -46,12 +42,25 @@ function thatSlide(index, randomize_pending, from_remote) {
 		slide_url += "?unlock="+unlock_code;
 	}
 	
-    $.getJSON(slide_url, function(data, textStatus) {
-		 slide_index = data.slide_index;
-    });
+    $.getJSON(slide_url, executeGoto);
   } else {
-	 slide_index = index;
+	 moveSlide(index);
   }
+}
+
+function executeGoto(data, textStatus) {
+	slide_index = data.slide_index;
+	
+	moveSlide(data.slide_index);
+}
+
+function moveSlide(index) {
+  var i=0;
+
+  slide_index = index;
+
+  // Set page counter content
+  showPageCounter();
   
   $("body > ol > li").each(function() {
     li = $(this);

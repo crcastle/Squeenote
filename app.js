@@ -40,13 +40,13 @@ sys.puts("unlock: "+unlock+" "+unlock_passcode);
       res.write("{\"remote_slide\": "+slide_index+", \"unlocks\": "+unlock_master+"}");
       res.end();
   } else if(r_info.pathname.indexOf("/goto") == 0) {
-	sys.puts("Trying to set slide num... "+r_info.href);
+	sys.puts("Trying to set slide num... "+r_info.pathname);
 		pr_slide_num = slide_index;
 		
 		if (unlock_master == true) {
-	      sys.puts("Setting slide num... "+r_info.href);
+	      sys.puts("Setting slide num... "+r_info.pathname);
 	      // Increment page value for inc requests
-	      segs = r_info.href.substr(6,5);
+	      segs = r_info.pathname.substr(6,5);
 	      
 	      slide_index = segs;
 		}
