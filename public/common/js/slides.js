@@ -1,5 +1,4 @@
 var slide_index, slide_count;
-var unlocked_state = false;
 
 var LEFT_KEY_CODE = 37;
 var RIGHT_KEY_CODE = 39;
@@ -7,59 +6,32 @@ var P_KEY_CODE = 80;
 
 function nextSlide(event) {
   if(slide_index >= slide_count-1) return false;
-  thatSlide(slide_index+1);
+  setSlide(slide_index+1);
   return true;
 }
 
 function prevSlide(event) {
   if(slide_index < 1) return false;
-  thatSlide(slide_index-1);
+  setSlide(slide_index-1);
   return true;
 }
 
-function toggleUnlockEntry() {
-	$("#unlock_entry").toggle(1000);
-}
-
-function showPageCounter() {
-	var html = "Slide "+(slide_index+1)+" of "+slide_count;
-	console.log('unlocked state --> '+unlocked_state);
-	if (unlocked_state) {
-		html += '<span class="unlocked">(Unlocked)</span>';
-	}
-	
-	$(".page_counter").html(html);
-}
-
-function thatSlide(index, randomize_pending, from_remote) {
+// Move to a specific slide. Attempt to sync state with the remote
+// app when doing so.
+function setSlide(index) {
   // Set everyone else's to the same
-  if(!from_remote) {
-	var slide_url = "/goto/"+index;
-	var unlock_code = $("#unlock_code").val();
-	
-	if (unlock_code != null && unlock_code != "") {
-		slide_url += "?unlock="+unlock_code;
-	}
-	
-    $.getJSON(slide_url, executeGoto);
-  } else {
-	 moveSlide(index);
-  }
+  if(!from_remote) presenterRequest("/goto/"+index);
+  showSlide(index);
 }
 
-function executeGoto(data, textStatus) {
-	slide_index = data.slide_index;
-	
-	moveSlide(data.slide_index);
-}
-
-function moveSlide(index) {
+// Show a certain slide locally without attempting to update the remote
+// state.
+function showSlide(index) {
   var i=0;
-
   slide_index = index;
 
   // Set page counter content
-  showPageCounter();
+  updatePageCounter();
   
   $("body > ol > li").each(function() {
     li = $(this);
@@ -81,7 +53,41 @@ function moveSlide(index) {
     }
     console.log("thatSlide "+index+" : set class for "+i+" to "+li.attr("class"));    
     i++;
-  });  
+  });
+}
+
+// Attempt to make a request including the presenter password, if the password has been entered.
+// The params argument is optional.
+// TODO display an error if the password is invalid
+function presenterRequest(url, params, responseCallback) {
+  // Make params argument optional
+  if(!responseCallback && typeof(params)=="function") {
+    responseCallback = params
+    params = {};
+  }
+  // fill in blank remainder arguments
+  if(!params) params = {};
+  if(!responseCallback) responseCallback = function() {};
+  // Check for presenter password
+  var presenter_password = $("#presenter_password").val();
+  if (presenter_password && presenter_password != "") {
+    params["unlock"] = presenter_password
+    $.getJSON(slide_url, params, function(data, textStatus) {
+      // TODO handle auth error
+      // Delegate to given callback
+      responseCallback(data, textStatus);
+    });
+  }
+}
+
+
+function togglePresenterControls() {
+	$("#presenter_controls").toggle(1000);
+}
+
+function updatePageCounter() {
+	var html = "Slide "+(slide_index+1)+" of "+slide_count;	
+	$(".page_counter").html(html);
 }
 
 $(document).ready(function() {
@@ -102,13 +108,13 @@ $(document).ready(function() {
 
     if(event.keyCode == LEFT_KEY_CODE) prevSlide();
     if(event.keyCode == RIGHT_KEY_CODE) nextSlide();
-	if(event.keyCode == P_KEY_CODE) toggleUnlockEntry();
+    if(event.keyCode == P_KEY_CODE) togglePresenterControls();
   });
   
   // Create the status readout
   $("body").prepend('<section class="page_counter"></section>');
-  $("body").prepend('<section id="unlock_entry" style="display: none;"><input id="unlock_code" type="text" value="" /></section>');
+  $("body").prepend('<section id="presenter_controls" style="display: none;"><input id="presenter_password" type="text" value="" /></section>');
   
   // Set to slide zero
-  thatSlide(0, true, true);
+  showSlide(0);
 });
