@@ -1,74 +1,30 @@
 var sys = require('sys'),
-    http = require('http'),
-    url = require('url'),
-    fs = require('fs'),
-	path = require('path');
+    path = require('path'),
+    squeenote = require('./node-lib/squeenote');
 
-// TODO the unlock passcode should be an argument given when starting the node app
-// TODO the presentation being served at the root path should be an argument given when starting the node app (default to index.html)
+// Perform boot setup with defaults
+var presentation_path = "index.html"; // This is the HTML file from which Squeenote will be presenting.
+var presenter_password = "bling-bling"; // This is the default password allowing the presenter controls to be used.
+var port = 8080; // The port at which the Squeenote server will listen for requests.
 
-var slide_index = 0;
-var unlock_passcode = "bling-bling";
-   
-http.createServer(function (req, res) {
-	var unlock_master = false;
-	
-  // Route url
-  var r_info = url.parse(req.url, true);  
-
- 	if (r_info.query != null) {
-		var unlock = r_info.query["unlock"];
-sys.puts("unlock: "+unlock+" "+unlock_passcode);
-		if (unlock != undefined && unlock == unlock_passcode) {
-			unlock_master = true;
-			sys.puts("Unlocked master mode!");
-		} else {
-			unlock_master = false;
-		}
-		
-		sys.puts("master-mode: "+unlock_master);
-	}
-
-  if(r_info.pathname == "/") {
-    sys.puts("Serving slide markup");
-      // Serve page for index/root requests
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    fs.readFile("index.html", function(error, data) {
-      res.write(data);
-      res.end();
-    });
-  } else if(r_info.pathname == "/hook") {
-      // Serve webhook for hook requests
-      res.writeHead(200, {"Content-Type": "application/json"});
-      res.write("{\"remote_slide\": "+slide_index+", \"unlocks\": "+unlock_master+"}");
-      res.end();
-  } else if(r_info.pathname.indexOf("/goto") == 0) {
-	sys.puts("Trying to set slide num... "+r_info.pathname);
-		pr_slide_num = slide_index;
-		
-		if (unlock_master == true) {
-	      sys.puts("Setting slide num... "+r_info.pathname);
-	      // Increment page value for inc requests
-	      segs = r_info.pathname.substr(6,5);
-	      
-	      slide_index = segs;
-		}
-	      res.writeHead(200, {"Content-Type": "application/json"});
-		  res.write("{\"previous_slide\": "+pr_slide_num+", \"slide_index\": "+slide_index+"}");
-	      res.end();
-  } else {
-    // Serve static file
-    sys.puts("Serving static file");
-      // Serve page for index/root requests
-    
-    res.writeHead(200, {});
-
-    fs.readFile("./public"+r_info.href, function(error, data) {
-      if(error) sys.puts(sys.inspect(error));
-      res.write(data);
-      res.end();
-    });
+// Parse commandline arguments
+for(var i=0; i<process.argv.length; i++) {
+  // is this a flag, and is the next item a valid argument?
+  flag = process.argv[i]; arg = process.argv[i+1];
+  if(flag.indexOf("-") == 0 && arg && arg.indexOf("-") != 0) {
+    switch(process.argv[i]) {
+      case "-p":
+        presenter_password = arg;
+        break;
+      case "-f":
+        presentation_path = arg;
+        break;
+      case "-P":
+        port = parseInt(arg);
+        break;
+    }
   }
+}
 
-}).listen(8080);
-sys.puts('Server running at http://127.0.0.1:8080/');
+squeenote.listen(presentation_path, presenter_password, port);
+return;
