@@ -20,6 +20,8 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
   // This event is only called when the state on an individual slide *changes*, so you don't have to worry
   // about it running on every slide switch.
   $(presentation.jq_slide_selector).bind("slideStateChanged.squeenote", function(event, li, state) {
+    li = $(li);
+    li.attr("class", state);
     switch(state) {
       case "done":
         break;
