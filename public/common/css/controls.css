@@ -1,0 +1,25 @@
+#squeenote_controls {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  font-size: 16px;
+  background: #111;
+  -webkit-box-shadow: 0px 0px 5px #333;
+  -moz-box-shadow: 0px 0px 5px #333;
+  border-bottom: 1px solid #333;
+}
+
+#squeenote_controls a {
+  color: #FFF;
+  cursor: pointer;
+}
+
+#squeenote_controls .slide_counter {
+  float: right;
+  padding: 10px;
+  margin: 5px;
+  color: #666;
+  background: #333;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+}
