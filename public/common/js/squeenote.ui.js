@@ -3,6 +3,7 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
   // Take the presentation wrapper as the main event dispatcher
   var presentation = presentation;
   var dispatcher = presentation.jq_presentation;
+  var presenter_controls_toggle_keycode = 80; // The P key
 
   // Create the control strip
   $("body").prepend("<section id=\"squeenote_controls\"><section>");
@@ -35,7 +36,7 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
   // Add the client controls
   control_strip.prepend(
     "<section class=\"client_controls\">\
-        <a class=\"follow_presenter_toggle\"></a>\
+        <a class=\"follow_presenter_toggle\">Client controls</a>\
      </section>"
   );
   
@@ -45,7 +46,7 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
   
   // Add the presenter controls
   control_strip.prepend(
-    "<section id=\"presenter_controls\">\
+    "<section class=\"presenter_controls\" style=\"display: none\">\
         <input id=\"presenter_password\" type=\"text\" value=\"\" />\
      </section>"
   );
@@ -54,5 +55,12 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
   // Listen for the presenterPasswordAccepted event
   
   // Register the P key to toggle presenter controls
+  var presenter_controls_shown = true;
+  $("body").keyup(function(event) {
+    event.preventDefault();
+    if(event.keyCode == presenter_controls_toggle_keycode) {
+      $(".client_controls, .presenter_controls").toggle();
+    }
+  });
   
 });
