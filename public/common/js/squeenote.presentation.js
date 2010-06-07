@@ -180,12 +180,14 @@ squeenote.Presentation.prototype = {
   wsServerMessageReceived: function(data) {
     this.log("wsServerMessageReceived: ");
     // Broadcast authentication state
-    if(data.presenter_authenticated) {
-      if(!this.presenter_authenticated) this.jq_presentation.trigger("presenterAuthenticated.squeenote");
-      this.presenter_authenticated = true;
-    } else {
-      if(this.presenter_authenticated) this.jq_presentation.trigger("presenterNotAuthenticated.squeenote");
-      this.presenter_authenticated = false;
+    if(data.authentication_attempted) {
+      if(data.presenter_authenticated) {
+        if(!this.presenter_authenticated) this.jq_presentation.trigger("presenterAuthenticated.squeenote");
+        this.presenter_authenticated = true;
+      } else {
+        if(this.presenter_authenticated) this.jq_presentation.trigger("presenterNotAuthenticated.squeenote");
+        this.presenter_authenticated = false;
+      }
     }
 
     if(data.presenter_slide_index != this.presenter_slide_index) {

@@ -140,8 +140,9 @@ Server = this.Server = Class({
     presenter_authenticated = (message.presenter_password == this.presenter_password);
 
     // Sync local state for authenticated messages
-    if(presenter_authenticated && message.client_slide_index != null) {
-      this.setPresenterSlide(message.client_slide_index);
+    if(message.client_slide_index != null) {
+      client_response.authentication_attempted = true;
+      if(presenter_authenticated) this.setPresenterSlide(message.client_slide_index);
     }
 
     // Authenticated?

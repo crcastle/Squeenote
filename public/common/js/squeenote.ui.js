@@ -78,15 +78,21 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
         </section>\
      </section>"
   );
-  $("#presenter_password").bind("keyup", function(event) {
-    dispatcher.trigger("presenterPasswordChanged.squeenote", $(this).val());
+  $("#presenter_authentication_form").bind("submit", function(event) {
+    event.preventDefault();
+    dispatcher.trigger("presenterPasswordChanged.squeenote", $("#presenter_password").val());
   })
+  $(".disable_presenter_mode").click(function(event) {
+    $("#presenter_password").val("");
+    $("#presenter_authentication_form").submit();
+  });
   var presenter_authenticated = false;
   dispatcher.bind("presenterAuthenticated.squeenote", function(event) {
     event.preventDefault();
     if(!presenter_authenticated) {
       $(".presenter_controls_disabled").hide();
       $(".presenter_controls_enabled").show();
+      document.getElementsByTagName("body")[0].focus();
     }
     presenter_authenticated = true;
   })
@@ -108,6 +114,7 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
     event.preventDefault();
     if(event.keyCode == presenter_controls_toggle_keycode) {
       $(".client_controls, .presenter_controls").toggle();
+      $(".presenter_controls:visible input").focus();
     }
   });
   
