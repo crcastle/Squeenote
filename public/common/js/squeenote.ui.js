@@ -40,7 +40,9 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
   control_strip.prepend(
     "<section class=\"client_controls\">\
         <a class=\"follow_presenter_enabled disable_presenter_follow\">Presenter follow enabled.</a>\
-        <a class=\"follow_presenter_disabled enable_presenter_follow\">Presenter follow disabled. Presenter is on slide <span class=\"presenter_slide_number\"></span></a>\
+        <a class=\"follow_presenter_disabled enable_presenter_follow\">Presenter follow disabled. Presenter is on slide\
+          <span class=\"presenter_slide_number\">X</span>.\
+        </a>\
      </section>"
   );
   $(".enable_presenter_follow").click(function(event) {

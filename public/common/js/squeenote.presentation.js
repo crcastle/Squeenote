@@ -205,7 +205,7 @@ squeenote.Presentation.prototype = {
   // presenter_password,
   // client_slide_index,
   wsSyncStateToServer: function(data) {
-    if(!this.socket.connected) this.socket.connect();
+    this.socket.connect();
     if(!data) data = {};
     data = $(data).extend({
       client_slide_index: this.client_slide_index,

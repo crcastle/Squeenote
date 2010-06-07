@@ -9,7 +9,7 @@
   -moz-box-shadow: 0px 0px 5px #333;
   border-bottom: 1px solid #333;
   -webkit-opacity: 0.75;
-  -moz-opacity: 0.75;
+  -moz-opacity: 0.9;
   opacity: 0.75;
 }
 
@@ -27,3 +27,22 @@
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
 }
+
+#squeenote_controls .client_controls, .presenter_controls_disabled, .presenter_controls_enabled {
+  float: left;
+  padding: 10px;
+  margin: 5px;
+  color: #666;
+  background: #333;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+}
+
+#squeenote_controls .presenter_controls_enabled {
+  color: white;
+  background: green;
+}
+  #squeenote_controls .presenter_controls_enabled a {
+    color: lime;
+    text-decoration: underline;
+  }

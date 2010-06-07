@@ -3,7 +3,7 @@
 body {
   font-family: Helvetica;
   font-size: 1.5em;
-  background: #111;
+  background: #EFEFEF url('/squeenote-default/background.png');
   color: #333;
   width: 100%;
   height: 100%;
@@ -76,7 +76,7 @@ body > ol > li.pending {
 }
 body > ol > li.current {
 	border: 4px solid #FFF;
-	-webkit-box-shadow: 0px 0px 35px #00BFFF;
+	-webkit-box-shadow: 0px 0px 35px #5F5F45;
 }
 body > ol > li.done {
   top: -650px;
