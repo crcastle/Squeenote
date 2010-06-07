@@ -31,24 +31,5 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
         break;
     }
   });
-  //li = $(this);
-  //s = (Math.random() > 0.1)? 1 : -1;
-  //randrot = s*15*Math.random()
-  //
-  //if(i < index) {
-  //  if(!li.hasClass("done")) {
-  //    li.attr("class", "done");
-  //    li.css("-webkit-transform", "rotate("+randrot+"deg)");
-  //  }
-  //}
-  //if(i > index) {
-  //  li.attr("class", "pending");
-  //}
-  //if(index == i) {
-  //  li.attr("class", "current");
-  //  li.css("-webkit-transform", "rotate(0deg)");
-  //}
-  //console.log("thatSlide "+index+" : set class for "+i+" to "+li.attr("class"));    
-  //i++;
   
 });

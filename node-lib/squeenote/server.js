@@ -36,7 +36,7 @@ Server = this.Server = Class({
       _server.wsClientConnected(client);
     });
     this.wsListener.addListener("clientMessage", function(message, client) {
-      _server.wsRouteClientRequest(message, client);
+      _server.wsClientMessageReceived(message, client);
     });
     this.wsListener.addListener("clientDisconnect", function(client) {
       _server.wsClientDisconnected(client);
@@ -120,13 +120,6 @@ Server = this.Server = Class({
     res.end();
   },
   
-
-  // Returns the JSON required by the client
-  presentationStateResponse: function(req, res) {
-    res.writeHead(200, {"Content-Type": "application/json"});
-    res.write("{\"presenter_slide_history\": ["+this.presenter_slide_history.join(",")+"], \"presenter_slide_index\": "+this.presenter_slide_index+"}");
-    res.end();
-  },
   
   // ------------------------------------------------------------------------------------------
   // Websocket / Socket.io responders
@@ -134,41 +127,51 @@ Server = this.Server = Class({
   
   // Called when a socket.io client connects to the service
   wsClientConnected: function(client) {
-    sys.puts("wsClientConnected: "+sys.inspect(client));
-    client.send("connectionsuccessful");
+    sys.puts("wsClientConnected");
   },
   
   // Called when a socket.io client sends a message to the service.
   // Acts as a router action for websocket messages.
-  wsRouteClientRequest: function(message, client) {
-    sys.puts("wsRouteClientRequest: "+sys.inspect([message, client]));
+  wsClientMessageReceived: function(message, client) {
+    sys.puts("wsClientMessageReceived: "+sys.inspect(message));
+    // Process the message and build the response message
+    client_response = {};
+    broadcast_response = {};
+    presenter_authenticated = (message.presenter_password == this.presenter_password);
+
+    // Sync local state for authenticated messages
+    if(presenter_authenticated && message.client_slide_index != null) {
+      this.setPresenterSlide(message.client_slide_index);
+    }
+
+    // Authenticated?
+    client_response.presenter_authenticated = presenter_authenticated;
+    // Remote slide state
+    client_response.presenter_slide_index = broadcast_response.presenter_slide_index = this.presenter_slide_index;
+    client_response.presenter_slide_history = broadcast_response.presenter_slide_history = this.presenter_slide_history;
+
+
+
+    // Send response to individual client
+    client.send(client_response);
+    // If authenticated, save state and resync to all clients. 
+    // Note: some_client.broadcast will broadcast to all clients *except* some_client.
+    client.broadcast(broadcast_response);
   },
   
   // Called when a socket.io client disconnects from the service
   wsClientDisconnected: function(client) {
-    sys.puts("wsClientDisconnected: "+sys.inspect(client));
+    sys.puts("wsClientDisconnected");
   },
   
   // ------------------------------------------------------------------------------------------
   // Utilities
   // ------------------------------------------------------------------------------------------
   
-  // Checks a request to see if it is from the presenter.
-  // Returns a boolean.
-  presenterIsAuthenticated: function(req) {
-    var request_info = url.parse(req.url);
-    if (request_info.query) {
-      if (request_info.query["presenter_password"] == presenter_password) {
-        sys.puts("Inbound request has unlocked presenter controls!");
-        return true;
-      } else {
-        return false;
-      }
-    }    
-  },
   
   // Sets the current presenter slide index and stores the previous value in the history stack.
   setPresenterSlide: function(index) {
+    sys.puts("setPresenterSlide: "+index);
     this.presenter_slide_history.push(this.presenter_slide_index);
     this.presenter_slide_index = index;
     return this.presenter_slide_index;

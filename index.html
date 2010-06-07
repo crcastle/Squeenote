@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>SMILKit Walkthrough</title>
+	<title>Squeenote</title>
 
   <!-- Common dependencies -->
   <script type="text/javascript" src="/common/js/jquery-1.4.2.min.js"></script>
@@ -20,90 +20,13 @@
 <body>
 	<ol>
 		<li>
-			<h1 class="middle">SMILKit</h1>
-			<h3 class="middle">Videojuicer's Open Source SMIL 3.0 Engine</h3>
-			<p style="margin-top: 50px;">
-				<a class="middle" href="http://github.com/videojuicer/smilkit-as3">http://github.com/videojuicer/smilkit-as3</a>
+			<h1>Squeenote</h1>
+			<h3>A way for nerds to present to other nerds</h3>
+			<p>
+				<a class="middle" href="http://github.com/danski/squeenote">http://github.com/danski/squeenote</a>
 			</p>
 		</li>
-		<li>
-			<h1 class="middle">What is SMILKit?</h1>
-			<ul class="middle">
-				<li>SMILKit is a parsing and rendering engine for SMIL 3.0.</li>
-				<li>SMILKit is a general architecture which is implemented in language specific projects.</li>
-				<li>SMILKit's first implementation will be SMILKit-as3, a pure Actionscript 3.0 implementation.</li>
-			</ul>
-		</li>
-		<li>
-			<h1 class="middle">SMILKit Features</h1>
-			<ul class="middle">
-				<li>Rich Media Experiences</li>
-				<li>Built-in support for videos, images, audio, texts and animations</li>
-				<li>Extendable media handlers</li>
-				<li>SMIL 3.0 Support</li>
-				<li>Extensive SMIL layout system</li>
-				<li>Timing and synchronisation support with dynamic values through user states</li>
-				<li>Manipulatable SMIL DOM based on W3C DOM Level 2 and the Boston DOM Draft</li>
-			</ul>
-		</li>
-		<li>
-			<h1 class="middle">SMILKit-as3 Features</h1>
-			<ul class="middle">
-				<li>Video Quality of Service</li>
-				<li>Dynamic RTMP streaming and bit-rate switching</li>
-				<li>RTMP fallbacks to HTTP</li>
-				<li>Fast and safe buffering logic</li>
-				<li>Lightweight Actionscript 3.0 library with a tiny memory footprint and no dependencies</li>
-				<li>Retains a synchronisation rate of 200ms (4 per second) whilst keeping low CPU usage</li>
-			</ul>
-		</li>
-		<li>
-			<h1 class="middle">SMILKit-as3 Video QoS</h1>
-			<ul class="middle">
-				<li>Multiple delivery options built-in</li>
-				<li>RTMP (Streaming)</li>
-				<li>HTTP (Progressive or Streaming via Flash 10.1 only)</li>
-				<li>Dynamic switching between delivery options (finds the best bit-rate of the users connection)</li>
-				<li>Automatic RTMP fallback to HTTP (incase of bandwidth error)</li>
-				<li>Fast and safe buffering logic (requiring a minimum amount before playback begins)</li>
-				<li>Multiple bit-rates and fallbacks configured via standard W3C SMIL 3.0</li>
-			</ul>
-		</li>
-		<li>
-			<h1 class="middle">How SMILKit Loads a Document</h1>
-			<ul class="middle">
-				<li>Loads a SMIL document from the remote url</li>
-				<li>Parses the SMIL document via an XML parser to the SMIL DOM</li>
-				<li>Generates a timing graph based on the resolved assets from the DOM</li>
-				<li>Begins loading the assets and resolves any self-resolving assets</li>
-				<li>Starts the heartbeat ticking every 200ms</li>
-				<li>Creates a render tree from the timing graph if the assets exist at the current offset</li>
-				<li>Draws the assets from the render tree to the canvas via the asset handler</li>
-			</ul>
-		</li>
-		<li>
-			<h1 class="middle">SMILKit-as3 Roadmap</h1>
-			<ul class="middle">
-				<li></li>
-				<li></li>
-				<li></li>
-				<li></li>
-				<li></li>
-				<li></li>
-				<li></li>
-			</ul>
-		</li>
-		<li>
-			<h1 class="middle">Videojuicer Player v4 and SMILKit</h1>
-			<ul class="middle">
-				<li>SMILKit provides a rendered stage from a SMIL document</li>
-				<li>Uses the SMILKit DOM to allow manipulation to the presentation during runtime</li>
-				<li>First implementing media player to use the SMILKit engine</li>
-				<li>Player v4 provides the user interface and relays the playback commands to SMILKit</li>
-				<li>Addon architecture in v4 will allow SMIL DOM events to pass through to an addon</li>
-				<li>Player v4 adds VAST support to SMILKit through a custom asset handler</li>
-			</ul>
-		</li>
+		
 		<li>
 			<h1 class="middle">Questions?</h1>
 			<img class="middle" src="http://gaia.sunn.de/tmp/hypnotoad.gif">

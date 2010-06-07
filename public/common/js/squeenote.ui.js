@@ -24,6 +24,9 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
     $(".current_slide_number").html(presentation.client_slide_index+1);
     $(".slide_count").html(presentation.slide_count);
   });
+  dispatcher.bind("presentationPresenterSlideChanged.squeenote", function(event, presentation) {
+    $(".presenter_slide_number").html(presentation.presenter_slide_index+1);
+  });
   
   // Bind the next and previous links to the slide change functions
   $("#squeenote_controls a.prev_slide").bind("click", function(event) {
@@ -36,9 +39,28 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
   // Add the client controls
   control_strip.prepend(
     "<section class=\"client_controls\">\
-        <a class=\"follow_presenter_toggle\">Client controls</a>\
+        <a class=\"follow_presenter_enabled disable_presenter_follow\">Presenter follow enabled.</a>\
+        <a class=\"follow_presenter_disabled enable_presenter_follow\">Presenter follow disabled. Presenter is on slide <span class=\"presenter_slide_number\"></span></a>\
      </section>"
   );
+  $(".enable_presenter_follow").click(function(event) {
+    event.preventDefault();
+    presentation.startFollowingPresenter();
+  });
+  $(".disable_presenter_follow").click(function(event) {
+    event.preventDefault();
+    presentation.stopFollowingPresenter();
+  });
+  dispatcher.bind("stoppedFollowingPresenter.squeenote", function() {
+    console.log("received stoppedFollowingPresenter");
+    $(".follow_presenter_enabled").hide();
+    $(".follow_presenter_disabled").show();
+  });
+  dispatcher.bind("startedFollowingPresenter.squeenote", function() {
+    console.log("received startedFollowingPresenter");
+    $(".follow_presenter_enabled").show();
+    $(".follow_presenter_disabled").hide();
+  })
   
   // Listen for the stoppedFollowingPresenter event
   // Listen for the startedFollowingPresenter event
@@ -47,11 +69,35 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
   // Add the presenter controls
   control_strip.prepend(
     "<section class=\"presenter_controls\" style=\"display: none\">\
-        <form id=\"presenter_authentication_form\" action=\"/authenticate\">\
-          <input id=\"presenter_password\" type=\"text\" value=\"\" />\
+        <form id=\"presenter_authentication_form\" class=\"presenter_controls_disabled\" action=\"/authenticate\">\
+          <label for=\"presenter_password\">Enter the presenter password to enable presenter controls</label>\
+          <input id=\"presenter_password\" type=\"password\" value=\"\" />\
         </form>\
+        <section class=\"presenter_controls_enabled\" style=\"display: none\">\
+          Presenter mode <a class=\"disable_presenter_mode\">Sign off presenter</a>\
+        </section>\
      </section>"
   );
+  $("#presenter_password").bind("keyup", function(event) {
+    dispatcher.trigger("presenterPasswordChanged.squeenote", $(this).val());
+  })
+  var presenter_authenticated = false;
+  dispatcher.bind("presenterAuthenticated.squeenote", function(event) {
+    event.preventDefault();
+    if(!presenter_authenticated) {
+      $(".presenter_controls_disabled").hide();
+      $(".presenter_controls_enabled").show();
+    }
+    presenter_authenticated = true;
+  })
+  dispatcher.bind("presenterNotAuthenticated.squeenote", function(event) {
+    event.preventDefault();
+    if(presenter_authenticated) {
+      $(".presenter_controls_disabled").show();
+      $(".presenter_controls_enabled").hide();
+    }
+    presenter_authenticated = false;
+  })
   
   // Listen for the presenterPasswordIncorrect event
   // Listen for the presenterPasswordAccepted event

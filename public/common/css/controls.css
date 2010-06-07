@@ -8,6 +8,9 @@
   -webkit-box-shadow: 0px 0px 5px #333;
   -moz-box-shadow: 0px 0px 5px #333;
   border-bottom: 1px solid #333;
+  -webkit-opacity: 0.75;
+  -moz-opacity: 0.75;
+  opacity: 0.75;
 }
 
 #squeenote_controls a {

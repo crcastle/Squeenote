@@ -1,5 +1,65 @@
 if(typeof(squeenote)=="undefined") squeenote = {};
 
+/* 
+  squeenote.Presentation
+  
+  Controls the slide flow and also maintains a stateful connection to the squeenote server.
+  
+  Events can be bound to the provided jq_presentation object via window.presentation.jq_presentation.bind("...", function(event, args) {...});
+  
+  Events:
+  
+  $(document) events
+  ==================
+  
+  presentationLoaded.squeenote(presentation)
+  ------------------------------------------
+  Dispatched on the document element when the presentation is instantiated. 
+  Used by themes and the core squeenote UI to begin customising the markup.
+  
+  window.presentation.jq_presentation events
+  ==========================================
+  
+  presentationClientSlideChanged.squeenote(presentation)
+  ------------------------------------------------------
+  Dispatched on the wrapping list element when the client's slide changes, either
+  through manual keypresses from a client user or from syncing to the presenter's slide.
+  
+  presentationPresenterSlideChanged.squeenote(presentation)
+  ---------------------------------------------------------
+  Dispatched on the wrapping list element when the remote presenter changes slides.
+  The presentation object may optionally respond by changing the client slide if
+  presenter following is currently enabled by the client user.
+  
+  presenterAuthenticated.squeenote
+  --------------------------------
+  Dispatched on the wrapping list element when the presenter password is entered correctly
+  and confirmed by the squeenote server.
+  
+  presenterNotAuthenticated.squeenote
+  -----------------------------------
+  Dispatched on the wrapping list element when the presenter password is entered incorrectly.
+  
+  startedFollowingPresenter.squeenote
+  -----------------------------------
+  Called when the user enables presenter following through the UI. Will cause the presentation to
+  respond to presentationPresenterSlideChanged events by changing the client slide in kind.
+  
+  stoppedFollowingPresenter.squeenote
+  -----------------------------------
+  Called when the user disables presenter following either by toggling the switch provided in the
+  Squeenote UI, or by switching slides manually. Will cause a message to be displayed in the UI
+  indicating that the client user is off-presentation and providing an option to resync to the 
+  presenter at any time.
+  
+  list item events ($(window.presentation.jq_slide_selector).bind(....))
+  ======================================================================
+  
+  slideStateChanged.squeenote(list_item, state)
+  ---------------------------------------------
+  Called when an individual slide's state changes due to a slide index change. 
+  States are "done", "current" and "pending".
+*/
 squeenote.Presentation = function() {
   this.init();
 }
@@ -11,7 +71,12 @@ squeenote.Presentation.prototype = {
   verbose: true,                // Set console.log output
   prev_slide_keycode: 37,       // The left arrow key.
   next_slide_keycode: 39,       // The right arrow key.
-  presenter_mode: false,        // When true, generates control messages and attempts to keep other clients in sync.
+  
+  presenter_follow_enabled: null, // When true, the client will sync slides with the presenter. Following the presenter is considered 
+                                  // mutually exclusive to being authenticated as the presenter. Authenticating as a presenter will cancel
+                                  // presenter following.
+  presenter_authenticated: false, // When true, generates control messages and attempts to keep other clients in sync.
+  presenter_password: "",         // Kept in sync with the in-document password through the presenterPasswordChanged.squeenote event
   
   socket: null,                 // The socket.io client instance
   
@@ -29,15 +94,16 @@ squeenote.Presentation.prototype = {
     this.slide_count = $(this.jq_slide_selector).length;
     
     // Perform socket.io setup
-    io.setPath('/socket.io');
-    this.socket = new io.Socket('127.0.0.1');
+    io.setPath('/common/js/socket.io/');
+    this.socket = new io.Socket(window.location.host.split(":")[0], {
+      transports: ['websocket', 'server-events', 'htmlfile', 'xhr-multipart', 'xhr-polling']
+    });
     this.socket.connect();
     
     // Bind socket events
     this.socket.addEvent('message', function(data) {
       _instance.wsServerMessageReceived(data);
     });
-    
     
     // Bind internal events
     $("body").keyup(function(event) {
@@ -46,26 +112,43 @@ squeenote.Presentation.prototype = {
        if(event.keyCode == _instance.next_slide_keycode) _instance.nextSlide();
     });
     
+    // Bind external events
+    this.jq_presentation.bind("presenterPasswordChanged.squeenote", function(event, presenter_password) {
+      event.preventDefault();
+      _instance.log("Presenter password changed, will attempt to reauthenticate: "+presenter_password);
+      _instance.presenter_password = presenter_password;
+      _instance.wsSyncStateToServer();
+    })
+    this.jq_presentation.bind("presentationClientSlideChanged.squeenote", function(event, presentation) {
+      _instance.log("Client slide index changed, will attempt to sync to server.");
+      _instance.wsSyncStateToServer();
+    });
+    
     // Trigger the ready event for any theme javascript to pick up on.
     $(document).trigger("presentationLoaded.squeenote", this);
-    // Reset the slide count. Anything bound to the presentationLoaded event should now be listening for the change.
+    // Default to following the presenter.
+    this.startFollowingPresenter();
+  // Reset the slide count. Anything bound to the presentationLoaded event should now be listening for the change.
     this.showSlide(0);
   },
   
   prevSlide: function(index) {
-    if(this.client_slide_index <= 0) return this.showSlide(this.slide_count-1);
-    this.showSlide(this.client_slide_index-1);
+    if(this.client_slide_index <= 0) return this.showSlide(this.slide_count-1, true);
+    this.showSlide(this.client_slide_index-1, true);
   },
   
   nextSlide: function(index) {
-    if(this.client_slide_index >= this.slide_count-1) return this.showSlide(0);
-    this.showSlide(this.client_slide_index+1);
+    if(this.client_slide_index >= this.slide_count-1) return this.showSlide(0, true);
+    this.showSlide(this.client_slide_index+1, true);
   },
   
-  // Shows the slide with the specified index
-  showSlide: function(index) {
+  // Shows the slide with the specified index.
+  // If client_event is specified and evaluates to true, the change will be considered to be a local one
+  // that moves the user off-timeline and disables presenter following.
+  showSlide: function(index, client_event) {
     this.log("Showing slide with index: "+index);
     this.client_slide_index = index;
+    if(client_event) this.stopFollowingPresenter();
     this.jq_presentation.trigger("presentationClientSlideChanged.squeenote", this);
     var i = 0;
     $(this.jq_slide_selector).each(function() {
@@ -93,13 +176,59 @@ squeenote.Presentation.prototype = {
   },
   
   // Called when receiving a websocket message from the server.
+  // All messages from the squeenote server are full state marshals.
   wsServerMessageReceived: function(data) {
-    this.log("wsServerMessageReceived: "+data);
+    this.log("wsServerMessageReceived: ");
+    // Broadcast authentication state
+    if(data.presenter_authenticated) {
+      if(!this.presenter_authenticated) this.jq_presentation.trigger("presenterAuthenticated.squeenote");
+      this.presenter_authenticated = true;
+    } else {
+      if(this.presenter_authenticated) this.jq_presentation.trigger("presenterNotAuthenticated.squeenote");
+      this.presenter_authenticated = false;
+    }
+
+    if(data.presenter_slide_index != this.presenter_slide_index) {
+      this.log("Presenter slide changed to "+this.presenter_slide_index);
+      this.presenter_slide_index = data.presenter_slide_index;
+      // Broadcast presenter slide changed event, if changed
+      this.jq_presentation.trigger("presentationPresenterSlideChanged.squeenote", this);
+      // Follow the presenter, if following is enabled
+      if(this.presenter_follow_enabled) this.showSlide(this.presenter_slide_index);
+    }
   },
   
-  // Returns true if the client should switch slides with the presenter.
-  shouldTrackPresenterSlide: function() {
-    
+  // Syncs the current presentation state to the server along with any additional data
+  // supplied as a hash. By default, syncs:
+  // presenter_password,
+  // client_slide_index,
+  wsSyncStateToServer: function(data) {
+    if(!this.socket.connected) this.socket.connect();
+    if(!data) data = {};
+    data = $(data).extend({
+      client_slide_index: this.client_slide_index,
+      presenter_password: this.presenter_password
+    });
+    this.socket.send(data);
+  },
+  
+  // Starts syncing to the remote presenter's view
+  startFollowingPresenter: function() {
+    if(!this.presenter_follow_enabled) {
+      this.log("Presenter follow enabled");
+      this.presenter_follow_enabled = true;
+      this.showSlide(this.presenter_slide_index); // Resync with the presenter
+      this.jq_presentation.trigger("startedFollowingPresenter.squeenote");
+    }
+  },
+  
+  stopFollowingPresenter: function() {
+    if(this.presenter_follow_enabled) {
+      this.log("Presenter follow disabled");
+      this.presenter_follow_enabled = false;
+      // Dispatch event if we're actually making a change
+      this.jq_presentation.trigger("stoppedFollowingPresenter.squeenote");
+    }
   },
   
   log: function(message) {

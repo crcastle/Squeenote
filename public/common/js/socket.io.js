@@ -1,4 +1,4 @@
-/** Socket.IO 0.2.2 - Built with build.js */
+/** Socket.IO 0.2.3 - Built with build.js */
 /**
  * Socket.IO client
  * 
@@ -8,7 +8,7 @@
  */
 
 this.io = {
-	version: '0.2.2',
+	version: '0.2.3',
 
 	setPath: function(path){
 		this.path = /\/$/.test(path) ? path : path + '/';
@@ -818,9 +818,14 @@ io.Transport = ioClass({
 	},
 
 	_onData: function(data){
-		try {
-			var msgs = JSON.parse(data);
-		} catch(e){}
+		var msgs;
+		if (typeof data === 'string'){
+			try {
+				msgs = JSON.parse(data);
+			} catch(e){}
+		} else {
+			msgs = data;
+		}
 		if (msgs && msgs.messages){
 		  for (var i = 0, l = msgs.messages.length; i < l; i++){
 				this._onMessage(msgs.messages[i]);	
@@ -1006,17 +1011,14 @@ io.Transport.flashsocket = io.Transport.websocket.extend({
 
 io.Transport.flashsocket.check = function(){
 	if (!('path' in io)) throw new Error('The `flashsocket` transport requires that you call io.setPath() with the path to the socket.io client dir.');
-  
-	if ('navigator' in window && 'plugins' in navigator && 'Shockwave Flash' in navigator.plugins){
-		return !! navigator.plugins['Shockwave Flash'].description;
-	} 
-
-	if ('ActiveXObject' in window){
+	if ('navigator' in window && 'plugins' in navigator && navigator.plugins['Shockwave Flash']){
+		return !!navigator.plugins['Shockwave Flash'].description;
+  }
+	if ('ActiveXObject' in window) {
 		try {
-			return !! new ActiveXObject('ShockwaveFlash.ShockwaveFlash').GetVariable('$version');
-		} catch (e){}      
+			return !!new ActiveXObject('ShockwaveFlash.ShockwaveFlash').GetVariable('$version');
+		} catch (e) {}
 	}
-
 	return false;
 };
 /**
@@ -1027,62 +1029,67 @@ io.Transport.flashsocket.check = function(){
  * @copyright Copyright (c) 2010 LearnBoost <dev@learnboost.com>
  */
 
-(function(){  
-	var empty = new Function, request = io.Transport.XHR.request;
+io.Transport['htmlfile'] = io.Transport.extend({
 
-	io.Transport['htmlfile'] = io.Transport.extend({
+	type: 'htmlfile',
 
-		type: 'htmlfile',
+	connect: function(){
+		var self = this;
+		this._open();
+		window.attachEvent('onunload', function(){ self._destroy(); });
+	},
+	
+	_open: function(){
+		this._doc = new ActiveXObject('htmlfile');
+		this._doc.open();
+		this._doc.write('<html></html>');
+		this._doc.parentWindow.s = this;
+		this._doc.close();
+		
+		var _iframeC = this._doc.createElement('div');
+		this._doc.body.appendChild(_iframeC);
+		this._iframe = this._doc.createElement('iframe');
+		_iframeC.appendChild(this._iframe);
+		this._iframe.src = this._prepareUrl() + '/' + (+ new Date);
+	},
+	
+	_: function(data, doc){
+		this._onData(data);
+		var script = doc.getElementsByTagName('script')[0];
+		script.parentNode.removeChild(script);
+	},
+	
+	_destroy: function(){
+		this._iframe.src = 'about:blank';
+		this._doc = null;
+		CollectGarbage();
+	},
+	
+	send: function(data){      
+		this._sendXhr = io.Transport.XHR.request();
+		this._sendXhr.open('POST', this._prepareUrl() + '/send');
+		this._sendXhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded; charset=utf-8');
+		this._sendXhr.send('data=' + encodeURIComponent(data));
+	},
 
-		connect: function(){
-			var self = this;
+	disconnect: function(){
+		this._destroy();
+		if (this._sendXhr) this._sendXhr.abort();	
+		this._onClose();
+		this._onDisconnect();
+	}
 
-			this._doc = new ActiveXObject("htmlfile");
-			this._doc.open();
-			this._doc.write('<html><script>document.domain="'+ document.domain +'"</script></html>');
-			this._doc.close();      
+});
 
-			this.iframe = this.doc.createElement('div');
-			this._doc.body.appendChild(iframe);
-			iframe.innerHTML = '<iframe src="'+ this._prepareUrl() +'"></iframe>';
-
-			this.doc.parentWindow.callback = function(data){ self._onData(data); };      
-			window.attachEvent('onunload', function(){ self._destroy(); });
-		},
-
-		send: function(data){      
-			this._sendXhr = request();
-			this._sendXhr.open('POST', this._prepareUrl() + '/send');      
-			this._sendXhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded; charset=utf-8');        
-			this._sendXhr.send('data=' + encodeURIComponent(data));
-		},
-
-		disconnect: function(){
-			this._destroy();
-			if (this._sendXhr) this._sendXhr.abort();	
-			this._onClose();
-			this._onDisconnect();
-		},
-
-		_destroy: function(){
-			this._doc = null;
-			CollectGarbage();
-		}
-
-	});
-
-	io.Transport['htmlfile'].check = function(){
-		return false;
-		if ('ActiveXObject' in window){
-			try {
-				var a = new ActiveXObject('htmlfile');
-				return io.Transport.XHR.check();
-			} catch(e){}
-		}
-		return false;
-	};
-
-})();
+io.Transport['htmlfile'].check = function(){
+	if ('ActiveXObject' in window){
+		try {
+			var a = new ActiveXObject('htmlfile');
+			return io.Transport.XHR.check();
+		} catch(e){}
+	}
+	return false;
+};
 /**
  * Socket.IO client
  * 
@@ -1853,13 +1860,33 @@ ASProxy.prototype =
 };
 
 // Copyright: Hiroshi Ichikawa <http://gimite.net/en/>
-// Lincense: New BSD Lincense
+// License: New BSD License
 // Reference: http://dev.w3.org/html5/websockets/
 // Reference: http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol
 
-if (!window.WebSocket) {
+(function() {
+  
+  if (window.WebSocket) return;
 
-  if (!window.console) console = {log: function(){ }, error: function(){ }};
+  var console = window.console;
+  if (!console) console = {log: function(){ }, error: function(){ }};
+
+  function hasFlash() {
+    if ('navigator' in window && 'plugins' in navigator && navigator.plugins['Shockwave Flash']) {
+      return !!navigator.plugins['Shockwave Flash'].description;
+    }
+    if ('ActiveXObject' in window) {
+      try {
+        return !!new ActiveXObject('ShockwaveFlash.ShockwaveFlash').GetVariable('$version');
+      } catch (e) {}
+    }
+    return false;
+  }
+  
+  if (!hasFlash()) {
+    console.error("Flash Player is not installed.");
+    return;
+  }
 
   WebSocket = function(url, protocol, proxyHost, proxyPort, headers) {
     var self = this;
@@ -1879,7 +1906,7 @@ if (!window.WebSocket) {
 
       self.__flash.addEventListener("close", function(fe) {
         try {
-          if (self.onopen) self.onclose();
+          if (self.onclose) self.onclose();
         } catch (e) {
           console.error(e.toString());
         }
@@ -2097,7 +2124,7 @@ if (!window.WebSocket) {
     container.appendChild(holder);
     document.body.appendChild(container);
     swfobject.embedSWF(
-      WebSocket.__swfLocation, "webSocketFlash", "10", "10", "9.0.0",
+      WebSocket.__swfLocation, "webSocketFlash", "8", "8", "9.0.0",
       null, {bridgeName: "webSocket"}, null, null,
       function(e) {
         if (!e.success) console.error("[WebSocket] swfobject.embedSWF failed");
@@ -2141,5 +2168,6 @@ if (!window.WebSocket) {
   } else {
     window.attachEvent("onload", WebSocket.__initialize);
   }
-}
+  
+})();
 
