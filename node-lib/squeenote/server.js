@@ -8,7 +8,8 @@ var io = require('socket.io');
 var http = require('http'),
     url = require('url'),
     fs = require('fs'),
-    sys = require('sys');
+    sys = require('sys'),
+    querystring = require('querystring');
     
 Server = this.Server = Class({
   
@@ -35,7 +36,7 @@ Server = this.Server = Class({
       _server.wsClientConnected(client);
     });
     this.wsListener.addListener("clientMessage", function(message, client) {
-      _server.wsClientMessageReceived(message, client);
+      _server.wsRouteClientRequest(message, client);
     });
     this.wsListener.addListener("clientDisconnect", function(client) {
       _server.wsClientDisconnected(client);
@@ -54,6 +55,7 @@ Server = this.Server = Class({
     sys.puts("Routing request for : "+request_info.href);
     if(request_info.pathname == "/") return this.presentationResponse(req, res);
     else if(request_info.pathname.indexOf("/goto") == 0) return this.presenterSlideChangeResponse(req, res);
+    else if(request_info.pathname.indexOf("/authenticate") ==0) return this.presenterAuthenticationResponse(req, res);
     else return this.staticFileResponse(req, res);
   },
   
@@ -65,6 +67,18 @@ Server = this.Server = Class({
       res.write(data);
       res.end();
     });
+  },
+  
+  // Accepts a ?presenter_password param and returns true if the presenter has entered the correct password
+  presenterAuthenticationResponse: function(req, res) {
+    var request_info = url.parse(req.url);
+    var query_info = querystring.parse(request_info.query);
+    sys.puts("Authenticating presenter");
+    if(query_info.presenter_password == this.presenter_password) {
+      sys.puts("Presenter authenticated");
+    } else {
+      sys.puts("Presenter denied authentication");
+    }
   },
   
   // Processes a request from a client to set the current presenter slide index.
@@ -120,17 +134,19 @@ Server = this.Server = Class({
   
   // Called when a socket.io client connects to the service
   wsClientConnected: function(client) {
-    
+    sys.puts("wsClientConnected: "+sys.inspect(client));
+    client.send("connectionsuccessful");
   },
   
-  // Called when a socket.io client sends a message to the service
-  wsClientMessageReceived: function(message, client) {
-    
+  // Called when a socket.io client sends a message to the service.
+  // Acts as a router action for websocket messages.
+  wsRouteClientRequest: function(message, client) {
+    sys.puts("wsRouteClientRequest: "+sys.inspect([message, client]));
   },
   
   // Called when a socket.io client disconnects from the service
   wsClientDisconnected: function(client) {
-    
+    sys.puts("wsClientDisconnected: "+sys.inspect(client));
   },
   
   // ------------------------------------------------------------------------------------------

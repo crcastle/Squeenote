@@ -47,7 +47,9 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
   // Add the presenter controls
   control_strip.prepend(
     "<section class=\"presenter_controls\" style=\"display: none\">\
-        <input id=\"presenter_password\" type=\"text\" value=\"\" />\
+        <form id=\"presenter_authentication_form\" action=\"/authenticate\">\
+          <input id=\"presenter_password\" type=\"text\" value=\"\" />\
+        </form>\
      </section>"
   );
   

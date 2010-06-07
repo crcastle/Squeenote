@@ -11,6 +11,9 @@ squeenote.Presentation.prototype = {
   verbose: true,                // Set console.log output
   prev_slide_keycode: 37,       // The left arrow key.
   next_slide_keycode: 39,       // The right arrow key.
+  presenter_mode: false,        // When true, generates control messages and attempts to keep other clients in sync.
+  
+  socket: null,                 // The socket.io client instance
   
   jq_presentation: null,       // A jQuery object containing the root presentation node.
   
@@ -19,13 +22,24 @@ squeenote.Presentation.prototype = {
   
   init: function() {
     this.log("init...");
-    
+    var _instance = this; // Scoped reference for use in evented functions here.
+
     // Set static references
     this.jq_presentation = $(this.jq_presentation_selector);
     this.slide_count = $(this.jq_slide_selector).length;
     
+    // Perform socket.io setup
+    io.setPath('/socket.io');
+    this.socket = new io.Socket('127.0.0.1');
+    this.socket.connect();
+    
+    // Bind socket events
+    this.socket.addEvent('message', function(data) {
+      _instance.wsServerMessageReceived(data);
+    });
+    
+    
     // Bind internal events
-    var _instance = this;
     $("body").keyup(function(event) {
        event.preventDefault();
        if(event.keyCode == _instance.prev_slide_keycode) _instance.prevSlide();
@@ -76,6 +90,11 @@ squeenote.Presentation.prototype = {
       }
       i++;
     });
+  },
+  
+  // Called when receiving a websocket message from the server.
+  wsServerMessageReceived: function(data) {
+    this.log("wsServerMessageReceived: "+data);
   },
   
   // Returns true if the client should switch slides with the presenter.
