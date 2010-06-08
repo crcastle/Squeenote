@@ -1,9 +1,11 @@
-/* @override http://127.0.0.1:8000/css/master.css */
+/* @override http://127.0.0.1:8080/public/squeenote-default/theme.css */
+
+/* @group Primitive object styles */
 
 body {
   font-family: Helvetica;
   font-size: 1.5em;
-  background: #EFEFEF url('/squeenote-default/background.png');
+  background: #EFEFEF url('/public/squeenote-default/background.png');
   color: #333;
   width: 100%;
   height: 100%;
@@ -14,104 +16,123 @@ a {
   color: #DB540F;
 }
 
-h1 {
-  color: #333;
-  margin: 0px;
-  padding: 20px 20px 25px 20px;
-  text-shadow: 3px 3px #CCC;
-}
+/* @end */
 
-body > ol > li:first-child h1 {
-	font-size: 4em;
-	margin-top: 110px;
-	margin-bottom: 40px;
-}
-
-p {
-  margin: 0px;
-  padding: 20px 20px 0 20px;
-}
-
-h1:last-child, p:last-child {
-  padding-bottom: 0;
-}
-
-.page_counter {
-	position: absolute;
-	top: 0;
-	right: 0;
-	text-align: right;
-	padding: 10px 10px 13px 15px;
-	background: white;
-	color: #333;
-	-webkit-border-bottom-left-radius: 15px;
-}
+/* @group Slide styles */
 
 body > ol {
   position: relative;
   max-width: 1860px;
   padding: 0;
-  margin: 10%;
+  margin: 8% 10%;
   list-style-type: none;
 }
 body > ol > li {
   position: absolute;
   width: 100%;
-  height: 525px;
+  height: 550px;
   margin: 0;
-  padding: 0 0 0 0px;
-  
-  -webkit-border-radius: 15px;
-  border: 4px solid #FFF;
-  
+  padding: 0;
   background: #FFF;
+  border: 4px solid #EFEFEF;
+  
+  -moz-border-radius: 15px;
+  -webkit-border-radius: 15px;
+  
+  /* Webkit-specific transformations */
+  -webkit-transition-property: -webkit-transform, -webkit-opacity, -webkit-box-shadow, left, right;
   -webkit-transform-origin: 50% 50%;
-  -webkit-transition-property: -webkit-transform, -webkit-opacity, border, top, left;
+  
   -webkit-transition-duration: 0.3s;
   -webkit-transition-timing-function: ease-out;
 }
 body > ol > li.pending {
-	top: 0; left: 0;
- 	-webkit-transform: rotate(0deg);
+	top: 0; right: -109%;
+ 	-webkit-box-shadow: 0px 0px 5px #CCC;
 }
 body > ol > li.current {
-	border: 4px solid #FFF;
 	-webkit-box-shadow: 0px 0px 35px #5F5F45;
 }
 body > ol > li.done {
-  top: -650px;
-  -webkit-box-shadow: 0px 0px 5px #black;
-  border: 5px solid #FFF;
-}
-body > ol > li > * {
- margin-left: 10px;
-text-align: center;
+  	top: -0; left: -109%;
 }
 
-body > ol > li > img {
+/* @end */
+
+/* @group Slide content styles */
+
+body > ol > li > * {
+	text-align: center;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  	color: #FF8E00;
+  	font-size: 4em;
+  	margin: 30px 0px 0px 0px;
+  	padding: 20px 20px 25px 20px;
+  	text-shadow: 2px 2px #FFB75E;
+}
+
+h2, h3, h4, h5, h6 {
+	margin:  0;
+	color: #333;
+	text-shadow: 2px 2px #CCC;
+	font-size: 2.5em;	
+}
+
+h4, h5, h6 {
+	font-size:  2em;
+}
+
+p {
+  	margin: 0px;
+  	padding: 20px 20px 0 20px;
+}
+
+img {
 	display: block;
 	margin: auto;
 }
 
-ul {
+ol ul {
 	list-style-type: none;
-	margin:  0 20px; 
-	padding: 0;
+	margin:  0 auto; 
+	padding: 0 15px;
 }
-	ul > li {
-		margin: 0;
+	ol ul li {
+
+		margin-bottom: 15px;
 		padding: 15px;
-		border-bottom: 2px solid #CCC;
+		background:  #EFEFEF;
+		border:  1px solid #DDD;
+		-webkit-border-radius: 10px;
+		-moz-border-radius: 10px;
 	}
-	ul > li:last-child {
-		border:  none;
+	ol ul li:last-child {
+		margin-bottom: 0;
 	}
 
-code {
-  display: block;
-  font-size: 2em;
-  margin: 20px;
-  padding: 20px;
-  background: #333;
-  color: white;
+ol li pre {
+	margin: 0;
 }
+
+ol li code {
+  	display: block;
+  	height: 300px;
+  	font-size: 1em;
+  	text-align: left;
+  	margin: 20px;
+  	padding: 10px;
+  	background: #333;
+  	border: 3px solid #333;
+  	-webkit-border-radius: 3px;
+  	-moz-border-radius: 3px;
+  	color: white;
+  	overflow-y: scroll;
+}
+
+ol li code.bash {
+	height: 40px;
+}
+
+/* @end */

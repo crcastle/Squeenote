@@ -31,12 +31,12 @@ if(typeof(squeenote)=="undefined") squeenote = {};
   The presentation object may optionally respond by changing the client slide if
   presenter following is currently enabled by the client user.
   
-  presenterAuthenticated.squeenote
+  authenticatedAsPresenter.squeenote
   --------------------------------
   Dispatched on the wrapping list element when the presenter password is entered correctly
   and confirmed by the squeenote server.
   
-  presenterNotAuthenticated.squeenote
+  unAuthenticatedAsPresenter.squeenote
   -----------------------------------
   Dispatched on the wrapping list element when the presenter password is entered incorrectly.
   
@@ -52,6 +52,14 @@ if(typeof(squeenote)=="undefined") squeenote = {};
   indicating that the client user is off-presentation and providing an option to resync to the 
   presenter at any time.
   
+  presenterOnline.squeenote
+  -------------------------
+  Called when the remote presenter comes online.
+  
+  presenterOffline.squeenote
+  --------------------------
+  Called when the remote presenter goes offline or terminates the presentation.
+  
   list item events ($(window.presentation.jq_slide_selector).bind(....))
   ======================================================================
   
@@ -66,7 +74,7 @@ squeenote.Presentation = function() {
 squeenote.Presentation.prototype = {
   
   client_slide_index: 0,        // The slide index currently being viewed by the client. Zero-based.
-  presenter_slide_index: 0,     // The slide index currently being shown by the presenter. Zero-based.
+  presenter_slide_index: null,  // The slide index currently being shown by the presenter. Zero-based.
   slide_count: 0,               // The total number of slides in the presentation
   verbose: true,                // Set console.log output
   prev_slide_keycode: 37,       // The left arrow key.
@@ -75,7 +83,8 @@ squeenote.Presentation.prototype = {
   presenter_follow_enabled: null, // When true, the client will sync slides with the presenter. Following the presenter is considered 
                                   // mutually exclusive to being authenticated as the presenter. Authenticating as a presenter will cancel
                                   // presenter following.
-  presenter_authenticated: false, // When true, generates control messages and attempts to keep other clients in sync.
+  presenter_online: false,        // Remains false until the first time we receive a presenterSlideChanged event.
+  authenticated_as_presenter: false, // When true, generates control messages and attempts to keep other clients in sync.
   presenter_password: "",         // Kept in sync with the in-document password through the presenterPasswordChanged.squeenote event
   
   socket: null,                 // The socket.io client instance
@@ -103,6 +112,9 @@ squeenote.Presentation.prototype = {
     // Bind socket events
     this.socket.addEvent('message', function(data) {
       _instance.wsServerMessageReceived(data);
+    });
+    this.socket.addEvent('disconnect', function() {
+      _instance.socket.connect(); // force reconnect
     });
     
     // Bind internal events
@@ -181,15 +193,25 @@ squeenote.Presentation.prototype = {
     this.log("wsServerMessageReceived: ");
     // Broadcast authentication state
     if(data.authentication_attempted) {
-      if(data.presenter_authenticated) {
-        if(!this.presenter_authenticated) this.jq_presentation.trigger("presenterAuthenticated.squeenote");
-        this.presenter_authenticated = true;
+      if(data.authenticated_as_presenter) {
+        if(!this.authenticated_as_presenter) this.jq_presentation.trigger("authenticatedAsPresenter.squeenote");
+        this.authenticated_as_presenter = true;
       } else {
-        if(this.presenter_authenticated) this.jq_presentation.trigger("presenterNotAuthenticated.squeenote");
-        this.presenter_authenticated = false;
+        if(this.authenticated_as_presenter) this.jq_presentation.trigger("unAuthenticatedAsPresenter.squeenote");
+        this.authenticated_as_presenter = false;
       }
     }
-
+    
+    // Detect presenter online/offline
+    if(data.presenter_slide_index != null) {
+      if(!this.presenter_online && data.presenter_slide_index != null) {
+        this.presenter_online = true;
+        this.jq_presentation.trigger("presenterOnline.squeenote");        
+      } else if(data.presenter_slide_index == null) {
+        this.jq_presentation.trigger("presenterOffline.squeenote");
+      }
+    }
+    // Detect presenter slide changes
     if(data.presenter_slide_index != this.presenter_slide_index) {
       this.log("Presenter slide changed to "+this.presenter_slide_index);
       this.presenter_slide_index = data.presenter_slide_index;

@@ -4,33 +4,100 @@
 	<title>Squeenote</title>
 
   <!-- Common dependencies -->
-  <script type="text/javascript" src="/common/js/jquery-1.4.2.min.js"></script>
-  <script type="text/javascript" src="/common/js/socket.io.js"></script>
-  
+  <script type="text/javascript" src="/public/common/js/jquery-1.4.2.min.js"></script>
+  <script type="text/javascript" src="/public/common/js/socket.io.js"></script>  
   <!-- Squeenote core -->
-  <script type="text/javascript" src="/common/js/squeenote.presentation.js"></script>
-  <script type="text/javascript" src="/common/js/squeenote.ui.js"></script>
-  <link rel="stylesheet" href="/common/css/controls.css" type="text/css" media="screen" title="no title" charset="utf-8">
-  
+  <script type="text/javascript" src="/public/common/js/squeenote.presentation.js"></script>
+  <script type="text/javascript" src="/public/common/js/squeenote.ui.js"></script>
+  <link rel="stylesheet" href="/public/common/css/controls.css" type="text/css" media="screen" title="no title" charset="utf-8">  
   <!-- Theme files -->
-  <script type="text/javascript" src="/squeenote-default/theme.js"></script>
-  <link rel="stylesheet" href="/squeenote-default/theme.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  <script type="text/javascript" src="/public/squeenote-default/theme.js"></script>
+  <link rel="stylesheet" href="/public/squeenote-default/theme.css" type="text/css" media="screen" title="no title" charset="utf-8">
 
 </head>
 <body>
-	<ol>
-		<li>
-			<h1>Squeenote</h1>
-			<h3>A way for nerds to present to other nerds</h3>
-			<p>
-				<a class="middle" href="http://github.com/danski/squeenote">http://github.com/danski/squeenote</a>
-			</p>
-		</li>
-		
-		<li>
-			<h1 class="middle">Questions?</h1>
-			<img class="middle" src="http://gaia.sunn.de/tmp/hypnotoad.gif">
-		</li>
-	</ol>
+  <ol>
+    <li>
+      <h1>Squeenote</h1>
+      <h3>A way for nerds to present to other nerds</h3>
+      <p>Press &larr; or &rarr; on the keyboard to move between slides, or use the buttons at the top right.</p>
+      <p><a href="http://github.com/danski/squeenote">http://github.com/danski/squeenote</a></p>
+    </li>
+
+  <li>
+    <h2>Build interactive presentations</h2>
+    
+    
+  </li>
+
+  <li>
+    <h2>Write presentations with simple HTML5</h2>
+    
+    <code class="html"><pre>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;title&gt;My presentation&lt;/title&gt;
+  ...
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;ol&gt;
+    &lt;li&gt;
+      &lt;h2&gt;Write presentations with simple HTML5&lt;/h2&gt;
+      &lt;code&gt;&lt;pre&gt;
+        &amp;lt;!DOCTYPE html&amp;gt;
+        &amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;
+        ...
+        &amp;lt;/html&amp;gt;
+      &lt;/pre&gt;&lt;/code&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre></code>
+  </li>
+  
+  <li>
+    <h2>Keep everyone in sync with Presenter Follow</h2>
+    
+    <p>Audience members can navigate slides at will and rejoin you as they please</p>
+  </li>
+  
+  <li>
+    <h2>Theme it however you like</h2>
+    
+    <ul>
+      <li>Squeenote's opinionated (but simple) markup lets you apply your own styles and transitions.</li>
+      <li>You can even override the Squeenote Bar's styles if you so choose</li>
+      <li>Squeenote's default theme uses CSS3 transitions for animation</li>
+      <li>Squeenote publishes events that your theme can use for transitions and styling.</li>
+    </ul>
+  </li>
+  
+  <li>
+    <h2>Deploy a presentation for remote viewing, or run it locally for a small crowd</h2>
+    
+    <code class="bash"><pre>node squeenote.node.js -f mypresentation.html -p mypresenterpassword -P 8080</pre></code>
+  </li>
+
+  <li>
+    <h2>Upload them as static files for later viewing</h2>
+    
+    <p>All static file URLs are still valid</p>
+  </li>
+
+  <li>
+    <h2>Open-source soup</h2>
+    
+    <ul>
+      <li>Squeenote Server uses <a href="http://nodejs.org">Node.js</a> and <a href="http://socket.io/">Socket.io</a></li>
+      <li>Squeenote UI uses <a href="http://jquery.com">jQuery</a></li>
+      <li>Squeenote Client uses <a href="http://socket.io/">Socket.io</a> for server connectivity</li>
+    </ul>
+  </li>
+
+  <li>
+    <h2>You will ask questions now.</h2>
+    <img class="middle" src="http://gaia.sunn.de/tmp/hypnotoad.gif">
+  </li>
+  </ol>
 </body>
 </html>

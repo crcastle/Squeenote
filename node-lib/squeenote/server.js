@@ -15,7 +15,7 @@ Server = this.Server = Class({
   
   init: function(presentation_path, presenter_password) {
     this.presenter_slide_history = []; // Contains all previously-selected slide indexes, excluding the currently-selected index.
-    this.presenter_slide_index = 0;
+    this.presenter_slide_index = null;
     this.presentation_path = presentation_path;
     this.presenter_password = presenter_password;
     this.httpListener = null;
@@ -54,9 +54,8 @@ Server = this.Server = Class({
     var request_info = url.parse(req.url);
     sys.puts("Routing request for : "+request_info.href);
     if(request_info.pathname == "/") return this.presentationResponse(req, res);
-    else if(request_info.pathname.indexOf("/goto") == 0) return this.presenterSlideChangeResponse(req, res);
-    else if(request_info.pathname.indexOf("/authenticate") ==0) return this.presenterAuthenticationResponse(req, res);
-    else return this.staticFileResponse(req, res);
+    else if(request_info.pathname.indexOf("/public" > -1)) return this.staticFileResponse(req, res);
+    else return this.notFoundResponse(req, res);
   },
   
   // Responds to the given request with the contents of the presentation file selected at server start.
@@ -69,44 +68,16 @@ Server = this.Server = Class({
     });
   },
   
-  // Accepts a ?presenter_password param and returns true if the presenter has entered the correct password
-  presenterAuthenticationResponse: function(req, res) {
-    var request_info = url.parse(req.url);
-    var query_info = querystring.parse(request_info.query);
-    sys.puts("Authenticating presenter");
-    if(query_info.presenter_password == this.presenter_password) {
-      sys.puts("Presenter authenticated");
-    } else {
-      sys.puts("Presenter denied authentication");
-    }
-  },
-  
-  // Processes a request from a client to set the current presenter slide index.
-  // Returns the JSON state to the client with a 200 OK status if the request is properly-authenticated.
-  // Returns a 403 Forbidden otherwise.
-  presenterSlideChangeResponse: function(req, res) {
-    var request_info = url.parse(req.url);
-    var presenter_controls_unlocked = presenterIsAuthenticated(req);
-    if(!presenter_controls_unlocked) return denyResponse(req, res, "Not permitted to set the remote presenter slide. Incorrect password.");
-    // Now process the change request    
-    segs = request_info.pathname.substr(6,5);
-    this.setPresenterSlide(parseInt(segs));
-    return presentationStateResponse(req, res);
-  },
-  
   // Returns the contents of a static file if the file exists within the public directory.
   // Responds with a 404 Not Found if the file does not exist.
   // Responds with a 403 Forbidden if the requested path contains ".." or any other jiggery-pokery.
   staticFileResponse: function(req, res) {
     var request_info = url.parse(req.url);
     sys.puts("Serving static file: "+request_info.href);
+    if(request_info.href.indexOf("/public") != 0) return denyResponse(req, res, "Static file requested outside of public directory");
     if(request_info.href.indexOf("..") > -1) return denyResponse(req, res, "Illegal static file path");
-    fs.readFile("./public"+request_info.href, function(error, data) {
-      if(error) {
-        res.writeHead(404, {});
-        res.end();
-        return;
-      }
+    fs.readFile("."+request_info.href, function(error, data) {
+      if(error) return this.notFoundResponse(req, res);
       res.writeHead(200, {});
       res.write(data);
       res.end();
@@ -120,6 +91,13 @@ Server = this.Server = Class({
     res.end();
   },
   
+  notFoundResponse: function(req, res) {
+    var request_info = url.parse(req.url);
+    sys.puts("404 Not Found: "+request_info.href);
+    res.writeHead(404, {});
+    res.end();
+  },
+  
   
   // ------------------------------------------------------------------------------------------
   // Websocket / Socket.io responders
@@ -128,6 +106,7 @@ Server = this.Server = Class({
   // Called when a socket.io client connects to the service
   wsClientConnected: function(client) {
     sys.puts("wsClientConnected");
+    this.wsClientMessageReceived({}, client);
   },
   
   // Called when a socket.io client sends a message to the service.
@@ -139,23 +118,24 @@ Server = this.Server = Class({
     broadcast_response = {};
     presenter_authenticated = (message.presenter_password == this.presenter_password);
 
+
     // Sync local state for authenticated messages
-    if(message.client_slide_index != null) {
+    if(message.presenter_password) {
       client_response.authentication_attempted = true;
+    }
+    if(message.client_slide_index != null) {
       if(presenter_authenticated) this.setPresenterSlide(message.client_slide_index);
     }
 
     // Authenticated?
-    client_response.presenter_authenticated = presenter_authenticated;
+    client_response.authenticated_as_presenter = presenter_authenticated;
     // Remote slide state
     client_response.presenter_slide_index = broadcast_response.presenter_slide_index = this.presenter_slide_index;
     client_response.presenter_slide_history = broadcast_response.presenter_slide_history = this.presenter_slide_history;
 
-
-
     // Send response to individual client
     client.send(client_response);
-    // If authenticated, save state and resync to all clients. 
+    // Resync to all other clients using the broadcast response.
     // Note: some_client.broadcast will broadcast to all clients *except* some_client.
     client.broadcast(broadcast_response);
   },

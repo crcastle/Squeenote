@@ -12,10 +12,10 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
   // Create the slide counter
   control_strip.prepend(
     "<section class=\"slide_counter\">\
-        <a class=\"prev_slide\">&laquo;</a>\
+        <a class=\"prev_slide\">&larr;</a>\
         Slide <span class=\"current_slide_number\">X</span>\
         of <span class=\"slide_count\">Y</span>\
-        <a class=\"next_slide\">&raquo;</a>\
+        <a class=\"next_slide\">&rarr;</a>\
      </section>"
   );
 
@@ -39,9 +39,12 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
   // Add the client controls
   control_strip.prepend(
     "<section class=\"client_controls\">\
-        <a class=\"follow_presenter_enabled disable_presenter_follow\">Presenter follow enabled.</a>\
-        <a class=\"follow_presenter_disabled enable_presenter_follow\">Presenter follow disabled. Presenter is on slide\
-          <span class=\"presenter_slide_number\">X</span>.\
+        <a class=\"follow_presenter_enabled disable_presenter_follow\">Presenter follow enabled.\
+          <span class=\"presenter_offline\">Waiting for presenter...</span>\
+        </a>\
+        <a class=\"follow_presenter_disabled enable_presenter_follow\">Presenter follow disabled.\
+          <span class=\"presenter_online\" style=\"display: none;\">Presenter is on slide <span class=\"presenter_slide_number\">X</span>.</span>\
+          <span class=\"presenter_offline\">Presenter is offline.</span>\
         </a>\
      </section>"
   );
@@ -52,6 +55,14 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
   $(".disable_presenter_follow").click(function(event) {
     event.preventDefault();
     presentation.stopFollowingPresenter();
+  });
+  dispatcher.bind("presenterOnline.squeenote", function() {
+    $(".presenter_online").show();
+    $(".presenter_offline").hide();
+  });
+  dispatcher.bind("presenterOffline.squeenote", function() {
+    $(".presenter_online").hide();
+    $(".presenter_offline").show();
   });
   dispatcher.bind("stoppedFollowingPresenter.squeenote", function() {
     console.log("received stoppedFollowingPresenter");
@@ -88,23 +99,23 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
     $("#presenter_password").val("");
     $("#presenter_authentication_form").submit();
   });
-  var presenter_authenticated = false;
-  dispatcher.bind("presenterAuthenticated.squeenote", function(event) {
+  var authenticated_as_presenter = false;
+  dispatcher.bind("authenticatedAsPresenter.squeenote", function(event) {
     event.preventDefault();
-    if(!presenter_authenticated) {
+    if(!authenticated_as_presenter) {
       $(".presenter_controls_disabled").hide();
       $(".presenter_controls_enabled").show();
       document.getElementsByTagName("body")[0].focus();
     }
-    presenter_authenticated = true;
+    authenticated_as_presenter = true;
   })
-  dispatcher.bind("presenterNotAuthenticated.squeenote", function(event) {
+  dispatcher.bind("unAuthenticatedAsPresenter.squeenote", function(event) {
     event.preventDefault();
-    if(presenter_authenticated) {
+    if(authenticated_as_presenter) {
       $(".presenter_controls_disabled").show();
       $(".presenter_controls_enabled").hide();
     }
-    presenter_authenticated = false;
+    authenticated_as_presenter = false;
   })
   
   // Listen for the presenterPasswordIncorrect event
@@ -116,7 +127,7 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
     event.preventDefault();
     if(event.keyCode == presenter_controls_toggle_keycode) {
       $(".client_controls, .presenter_controls").toggle();
-      $(".presenter_controls:visible input").focus();
+      $(".presenter_controls:visible input")[0].focus();
     }
   });
   

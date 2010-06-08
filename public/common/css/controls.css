@@ -5,9 +5,9 @@
   width: 100%;
   font-size: 16px;
   background: #111;
-  -webkit-box-shadow: 0px 0px 5px #333;
-  -moz-box-shadow: 0px 0px 5px #333;
-  border-bottom: 1px solid #333;
+  -webkit-box-shadow: 0px 0px 5px #000;
+  -moz-box-shadow: 0px 0px 5px #000;
+  border-bottom: 1px solid #000;
   -webkit-opacity: 0.75;
   -moz-opacity: 0.9;
   opacity: 0.75;
