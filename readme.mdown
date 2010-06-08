@@ -44,7 +44,7 @@ Squeenote is built to be modular. There are several required components and seve
 Presentation markup
 -------------------
 
-Squeenote's markup is extremely simple. Simply include an &lt;ol /&gt; tag directly inside the body, and Squeenote will treat all the <li /> elements within it as individual slides. Squeenote includes a default theme which provides some basic styling and animations. Feel free to open them up (in /public/squeenote-default), or copy them to a new folder and create a new theme. Here's an example HTML presentation with one slide:
+Squeenote's markup is extremely simple. Simply include an &lt;ol /&gt; tag directly inside the body, and Squeenote will treat all the &lt;li /&gt; elements within it as individual slides. Squeenote includes a default theme which provides some basic styling and animations. Feel free to open them up (in /public/squeenote-default), or copy them to a new folder and create a new theme. Here's an example HTML presentation with one slide:
 
     <!DOCTYPE html>
     <html lang="en">
