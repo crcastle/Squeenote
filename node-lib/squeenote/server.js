@@ -120,7 +120,7 @@ Server = this.Server = Class({
 
 
     // Sync local state for authenticated messages
-    if(message.presenter_password) {
+    if(message.presenter_password != null) {
       client_response.authentication_attempted = true;
     }
     if(message.client_slide_index != null) {

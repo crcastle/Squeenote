@@ -81,21 +81,29 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
   
   // Add the presenter controls
   control_strip.prepend(
-    "<section class=\"presenter_controls\" style=\"display: none\">\
+    "<section class=\"presenter_controls\">\
         <form id=\"presenter_authentication_form\" class=\"presenter_controls_disabled\" action=\"/authenticate\">\
-          <label for=\"presenter_password\">Enter the presenter password to enable presenter controls</label>\
+          <label for=\"presenter_password\">Presenter password</label>\
           <input id=\"presenter_password\" type=\"password\" value=\"\" />\
         </form>\
-        <section class=\"presenter_controls_enabled\" style=\"display: none\">\
+        <section class=\"presenter_controls_enabled\">\
           Presenter mode <a class=\"disable_presenter_mode\">Sign off presenter</a>\
         </section>\
      </section>"
   );
   $("#presenter_authentication_form").bind("submit", function(event) {
     event.preventDefault();
+    $("#presenter_password").focusout();
     dispatcher.trigger("presenterPasswordChanged.squeenote", $("#presenter_password").val());
   })
+  $("#presenter_password").focusin(function(event) {
+    listen_for_presenter_hotkey = false;
+  });
+  $("#presenter_password").focusout(function(event) {
+    listen_for_presenter_hotkey = true;
+  })
   $(".disable_presenter_mode").click(function(event) {
+    togglePresenterAndClientControls();
     $("#presenter_password").val("");
     $("#presenter_authentication_form").submit();
   });
@@ -103,17 +111,14 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
   dispatcher.bind("authenticatedAsPresenter.squeenote", function(event) {
     event.preventDefault();
     if(!authenticated_as_presenter) {
-      $(".presenter_controls_disabled").hide();
-      $(".presenter_controls_enabled").show();
-      document.getElementsByTagName("body")[0].focus();
+      $(".presenter_controls").addClass("enabled");
     }
     authenticated_as_presenter = true;
   })
   dispatcher.bind("unAuthenticatedAsPresenter.squeenote", function(event) {
     event.preventDefault();
     if(authenticated_as_presenter) {
-      $(".presenter_controls_disabled").show();
-      $(".presenter_controls_enabled").hide();
+      $(".presenter_controls").removeClass("enabled");
     }
     authenticated_as_presenter = false;
   })
@@ -122,13 +127,20 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
   // Listen for the presenterPasswordAccepted event
   
   // Register the P key to toggle presenter controls
-  var presenter_controls_shown = true;
+  var presenter_controls_shown = false;
+  var listen_for_presenter_hotkey = true;
+  function togglePresenterAndClientControls(event) {
+    intro = (presenter_controls_shown)? $(".client_controls") : $(".presenter_controls");
+    outro = (presenter_controls_shown)? $(".presenter_controls") : $(".client_controls");
+    intro.animate({opacity: 1, left: 0}, 250);
+    outro.animate({opacity: 0, left: -100}, 250);
+    presenter_controls_shown = !presenter_controls_shown;
+  }
   $("body").keyup(function(event) {
     event.preventDefault();
-    if(event.keyCode == presenter_controls_toggle_keycode) {
-      $(".client_controls, .presenter_controls").toggle();
-      $(".presenter_controls:visible input")[0].focus();
-    }
+    if(listen_for_presenter_hotkey && event.keyCode == presenter_controls_toggle_keycode) {
+      togglePresenterAndClientControls(event);
+    }    
   });
   
 });
