@@ -11,7 +11,7 @@ Squeenote presentations can be uploaded to a static file server for archival.
 
 To watch a presentation about squeenote:
 
-1. Install [Node.js](http://github.com/ry/node)
+1. Install [Node.js](http://github.com/ry/node) (Squeenote is built for v0.94)
 2. git clone git://github.com/danski/Squeenote.git
 3. cd Squeenote
 4. node squeenote.node.js
