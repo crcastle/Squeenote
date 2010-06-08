@@ -137,7 +137,7 @@ Server = this.Server = Class({
     client.send(client_response);
     // Resync to all other clients using the broadcast response.
     // Note: some_client.broadcast will broadcast to all clients *except* some_client.
-    client.broadcast(broadcast_response);
+    if(presenter_authenticated) client.broadcast(broadcast_response);
   },
   
   // Called when a socket.io client disconnects from the service
