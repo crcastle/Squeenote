@@ -39,8 +39,9 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
   // Add the client controls
   control_strip.prepend(
     "<section class=\"client_controls\">\
-        <a class=\"follow_presenter_enabled disable_presenter_follow\">Presenter follow enabled.\
-          <span class=\"presenter_offline\">Waiting for presenter...</span>\
+        <a class=\"follow_presenter_enabled disable_presenter_follow\">\
+          <span class=\"presenter_online\" style=\"display: none;\"> Presenter follow enabled.</span>\
+          <span class=\"presenter_offline\">Presenter is offline.</span>\
         </a>\
         <a class=\"follow_presenter_disabled enable_presenter_follow\">Presenter follow disabled.\
           <span class=\"presenter_online\" style=\"display: none;\">Presenter is on slide <span class=\"presenter_slide_number\">X</span>.</span>\
@@ -65,12 +66,10 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
     $(".presenter_offline").show();
   });
   dispatcher.bind("stoppedFollowingPresenter.squeenote", function() {
-    console.log("received stoppedFollowingPresenter");
     $(".follow_presenter_enabled").hide();
     $(".follow_presenter_disabled").show();
   });
   dispatcher.bind("startedFollowingPresenter.squeenote", function() {
-    console.log("received startedFollowingPresenter");
     $(".follow_presenter_enabled").show();
     $(".follow_presenter_disabled").hide();
   })
@@ -115,11 +114,14 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
     }
     authenticated_as_presenter = true;
   })
+  dispatcher.bind("failedAuthenticationAsPresenter.squeenote", function(event) {
+    event.preventDefault();
+    $(".presenter_controls").effect("shake", {times: 3, distance: 10}, 100);
+    $(".presenter_controls").effect("highlight", {color: "#D70005"}, 2000);
+  });
   dispatcher.bind("unAuthenticatedAsPresenter.squeenote", function(event) {
     event.preventDefault();
-    if(authenticated_as_presenter) {
-      $(".presenter_controls").removeClass("enabled");
-    }
+    if(authenticated_as_presenter) $(".presenter_controls").removeClass("enabled");
     authenticated_as_presenter = false;
   })
   
@@ -133,7 +135,7 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
     intro = (presenter_controls_shown)? $(".client_controls") : $(".presenter_controls");
     outro = (presenter_controls_shown)? $(".presenter_controls") : $(".client_controls");
     intro.animate({opacity: 1, left: 0}, 250);
-    outro.animate({opacity: 0, left: -100}, 250);
+    outro.animate({opacity: 0, left: -500}, 250);
     presenter_controls_shown = !presenter_controls_shown;
   }
   $("body").keyup(function(event) {

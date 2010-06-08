@@ -16,18 +16,18 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
     z_counter--;
   });
   // Perform vertical centering
-  $(presentation.jq_slide_selector).each(function() {
-    slide = $(this);
-    s_height = slide.outerHeight();
-    // Wrap content
-    slide.wrapInner("<div class=\"vert_center_wrap\"></div>");
-    wrapper = $(".vert_center_wrap", slide);
-    w_height = wrapper.height();
-    // Add top margin to compensate
-    diff =  (s_height-w_height)/2;
-    console.log("DIFF: "+w_height+" into "+s_height+" makes "+diff);
-    wrapper.css("margin-top", diff+"px" );
-  });
+  //$(presentation.jq_slide_selector).each(function() {
+  //  slide = $(this);
+  //  s_height = slide.outerHeight();
+  //  // Wrap content
+  //  slide.wrapInner("<div class=\"vert_center_wrap\"></div>");
+  //  wrapper = $(".vert_center_wrap", slide);
+  //  w_height = wrapper.height();
+  //  // Add top margin to compensate
+  //  diff =  (s_height-w_height)/2;
+  //  console.log("DIFF: "+w_height+" into "+s_height+" makes "+diff);
+  //  wrapper.css("margin-top", diff+"px" );
+  //});
   
   
   // Listen for the slide state changed event and add/remove classes from the slides

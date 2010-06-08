@@ -38,6 +38,10 @@ if(typeof(squeenote)=="undefined") squeenote = {};
   
   unAuthenticatedAsPresenter.squeenote
   -----------------------------------
+  Dispatched on the wrapping list element when the presenter signs off.
+  
+  failedAuthenticationAsPresenter.squeenote
+  -------------------------------------
   Dispatched on the wrapping list element when the presenter password is entered incorrectly.
   
   startedFollowingPresenter.squeenote
@@ -85,7 +89,7 @@ squeenote.Presentation.prototype = {
                                   // presenter following.
   presenter_online: false,        // Remains false until the first time we receive a presenterSlideChanged event.
   authenticated_as_presenter: false, // When true, generates control messages and attempts to keep other clients in sync.
-  presenter_password: "",         // Kept in sync with the in-document password through the presenterPasswordChanged.squeenote event
+  presenter_password: null,         // Kept in sync with the in-document password through the presenterPasswordChanged.squeenote event
   
   socket: null,                 // The socket.io client instance
   
@@ -128,7 +132,7 @@ squeenote.Presentation.prototype = {
     this.jq_presentation.bind("presenterPasswordChanged.squeenote", function(event, presenter_password) {
       event.preventDefault();
       _instance.log("Presenter password changed, will attempt to reauthenticate: "+presenter_password);
-      _instance.presenter_password = presenter_password;
+      _instance.presenter_password = (presenter_password && presenter_password.replace(/\s/g, "").length > 0)? presenter_password : null;
       _instance.wsSyncStateToServer();
     })
     this.jq_presentation.bind("presentationClientSlideChanged.squeenote", function(event, presentation) {
@@ -190,16 +194,22 @@ squeenote.Presentation.prototype = {
   // Called when receiving a websocket message from the server.
   // All messages from the squeenote server are full state marshals.
   wsServerMessageReceived: function(data) {
-    this.log("wsServerMessageReceived: ");
     // Broadcast authentication state
     if(data.authentication_attempted) {
       if(data.authenticated_as_presenter) {
-        if(!this.authenticated_as_presenter) this.jq_presentation.trigger("authenticatedAsPresenter.squeenote");
+        if(!this.authenticated_as_presenter) {
+          this.log("Success - Signed on as presenter.");
+          this.jq_presentation.trigger("authenticatedAsPresenter.squeenote");
+        }
         this.authenticated_as_presenter = true;
       } else {
-        if(this.authenticated_as_presenter) this.jq_presentation.trigger("unAuthenticatedAsPresenter.squeenote");
-        this.authenticated_as_presenter = false;
+        this.log("Failure - Not authenticated as presenter.");
+        this.jq_presentation.trigger("failedAuthenticationAsPresenter.squeenote");   
       }
+    } else if(this.authenticated_as_presenter) {
+      this.log("Success - signed off as presenter");
+      this.jq_presentation.trigger("unAuthenticatedAsPresenter.squeenote");
+      this.authenticated_as_presenter = false;
     }
     
     // Detect presenter online/offline
