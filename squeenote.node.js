@@ -4,7 +4,7 @@ var sys = require('sys'),
 
 // Perform boot setup with defaults
 var presentation_path = "index.html"; // This is the HTML file from which Squeenote will be presenting.
-var presenter_password = "bling-bling"; // This is the default password allowing the presenter controls to be used.
+var presenter_password = "ishouldhavesetapassword"; // This is the default password allowing the presenter controls to be used.
 var port = 8080; // The port at which the Squeenote server will listen for requests.
 
 // Parse commandline arguments
