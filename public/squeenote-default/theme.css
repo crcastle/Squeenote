@@ -40,15 +40,12 @@ body > ol > li {
   -webkit-border-radius: 15px;
   
   /* Webkit-specific transformations */
-  -webkit-transition-property: -webkit-transform, -webkit-opacity, -webkit-box-shadow, left, right;
-  -webkit-transform-origin: 50% 50%;
-  
+  -webkit-transition-property: -webkit-box-shadow, left, right, opacity;
   -webkit-transition-duration: 0.3s;
   -webkit-transition-timing-function: ease-out;
 }
 body > ol > li.pending {
 	top: 0; right: -109%;
- 	-webkit-box-shadow: 0px 0px 5px #CCC;
 }
 body > ol > li.current {
 	-webkit-box-shadow: 0px 0px 35px #5F5F45;

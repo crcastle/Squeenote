@@ -20,7 +20,7 @@ To watch a presentation about squeenote:
 Presenter mode
 --------------
 
-Enabling presenter mode keeps the Squeenote Server synched to your slide so that client users can follow your position in the presentation. To enable presenter mode, open Squeenote in your browser and press P. Enter your presenter password and hit return.
+Enabling presenter mode keeps the Squeenote Server synched to your slide so that client users can follow your position in the presentation. To enable presenter mode, open Squeenote in your browser and press the equals key (=). Enter your presenter password and hit return.
 
 Server options
 --------------
@@ -37,6 +37,7 @@ Squeenote components
 Squeenote is built to be modular. There are several required components and several replaceable ones:
 
 * **squeenote.Server** is the Squeenote Node.js application.
+* **squeenote.Device** is the Javascript class responsible for identifying mobile client devices such as the iPhone and iPad.
 * **squeenote.Presentation** Is the Javascript class used to control the state of the presentation and maintain sync with the server.
 * **squeenote.UI** is responsible for drawing client and presenter controls into the markup. It subscribes to events from squeenote.Presentation in order to keep the user informed, and emits several events in turn from its various clickables.
 * **squeenote-default** is the provided presentation theme. It's in /public/squeenote-default, and you can customise it, copy it and mangle it to your heart's content. The theme is responsible for slide change animations and document formatting, and as such listens to events from squeenote.Presentation in order to apply animations on slide change. The default theme consists of a single CSS file and a single JS file, both located in this folder.
@@ -53,11 +54,24 @@ Squeenote's markup is extremely simple. Simply include an &lt;ol /&gt; tag direc
         <!-- Common dependencies -->
         <script type="text/javascript" src="/public/common/js/jquery-1.4.2.min.js"></script>
         <script type="text/javascript" src="/public/common/js/jquery-ui-1.8.2.custom.min.js"></script>
-        <script type="text/javascript" src="/public/common/js/socket.io.js"></script>  
+        <script type="text/javascript" src="/public/common/js/jqtouch.min.js"></script>
+        <script type="text/javascript" src="/public/common/js/socket.io.js"></script>
         <!-- Squeenote core -->
+        <script type="text/javascript" src="/public/common/js/squeenote.device.js"></script>
         <script type="text/javascript" src="/public/common/js/squeenote.presentation.js"></script>
         <script type="text/javascript" src="/public/common/js/squeenote.ui.js"></script>
         <link rel="stylesheet" href="/public/common/css/controls.css" type="text/css" media="screen" title="no title" charset="utf-8">  
+        <!-- Boot Squeenote -->
+        <script type="text/javascript">
+          $(document).ready(function() {
+            squeenote.Device = new squeenote.Device();
+            squeenote.Presentation = new squeenote.Presentation();
+          })
+          $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
+            squeenote.UI = new squeenote.UI(presentation);
+          });
+        </script>
+        
         <!-- Theme files -->
         <script type="text/javascript" src="/public/squeenote-default/theme.js"></script>
         <link rel="stylesheet" href="/public/squeenote-default/theme.css" type="text/css" media="screen" title="no title" charset="utf-8">

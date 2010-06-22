@@ -126,7 +126,7 @@ Server = this.Server = Class({
     if(message.client_slide_index != null) {
       if(presenter_authenticated) this.setPresenterSlide(message.client_slide_index);
     }
-
+    
     // Authenticated?
     client_response.authenticated_as_presenter = presenter_authenticated;
     // Remote slide state
@@ -148,7 +148,6 @@ Server = this.Server = Class({
   // ------------------------------------------------------------------------------------------
   // Utilities
   // ------------------------------------------------------------------------------------------
-  
   
   // Sets the current presenter slide index and stores the previous value in the history stack.
   setPresenterSlide: function(index) {

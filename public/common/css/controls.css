@@ -83,3 +83,45 @@
     color: lime;
     text-decoration: underline;
   }
+
+/* Device-specific control styles: iPad */
+body.iPad #squeenote_controls {
+}
+
+/* Device-specific control styles: iPhone */
+body.iPhone #squeenote_controls {
+  position: static;
+  width: 480px;
+  font-size: 1em;
+}
+
+
+body.iPhone #squeenote_controls .client_controls, body.iPhone #squeenote_controls.presenter_controls {
+	margin-top: 8px;
+	height: auto;
+	float: none;
+	display: block;
+}
+
+body.iPhone #squeenote_controls .slide_counter {
+	margin: 4px 3px 0 0;
+	background: none;
+	color: #333;
+	padding: 0;
+}
+
+body.iPhone #squeenote_controls a.prev_slide {
+	background: black;
+	font-size: 1.5em;
+	padding: 0px -2px 3px 3px;
+	-webkit-border-radius: 3px;
+}
+
+
+body.iPhone #squeenote_controls a.next_slide {
+	background: black;
+	font-size: 1.5em;
+	padding: 0px -2px 3px 3px;
+	-webkit-border-radius: 3px;
+	
+}

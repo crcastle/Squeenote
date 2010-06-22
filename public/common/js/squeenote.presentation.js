@@ -121,12 +121,13 @@ squeenote.Presentation.prototype = {
       _instance.socket.connect(); // force reconnect
     });
     
-    // Bind internal events
+    // Bind internal keystroke events
     $("body").keyup(function(event) {
        event.preventDefault();
        if(event.keyCode == _instance.prev_slide_keycode) _instance.prevSlide();
        if(event.keyCode == _instance.next_slide_keycode) _instance.nextSlide();
     });
+    // 
     
     // Bind external events
     this.jq_presentation.bind("presenterPasswordChanged.squeenote", function(event, presenter_password) {
@@ -270,7 +271,3 @@ squeenote.Presentation.prototype = {
   }
   
 };
-
-$(document).ready(function() {
-  window.presentation = new squeenote.Presentation();
-})
