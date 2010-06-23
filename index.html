@@ -42,18 +42,26 @@
     <li>
       <h1>Squeenote</h1>
       <h3>A way for nerds to present to other nerds</h3>
-      <p>Press &larr; or &rarr; on the keyboard to move between slides, or use the buttons at the top right.</p>
       <p><a href="http://github.com/danski/squeenote">http://github.com/danski/squeenote</a></p>
     </li>
 
   <li>
-    <h2>Build interactive presentations</h2>
-    
-    
+    <h2>For audiences like this.</h2>
+    <img class="photo" src="http://farm1.static.flickr.com/182/380186134_b74e5c70d6.jpg" />
   </li>
 
   <li>
-    <h2>Write presentations with simple HTML5</h2>
+    <h1>Presenter Follow</h1>
+    
+    <h3>Squeenote keeps everyone's view on the presentation in sync.</h3>
+    
+    <p>If you're in the audience, you can browse the presentation as you please and rejoin the presenter whenever you like. It works using HTML5 websockets and the souls of the damned.</p>    
+  </li>
+
+  <li>
+    <h2>Presentation == a web page.</h2>
+    
+    <p>A Squeenote presentation is just an ordered list. Each item in the list is a slide.</p>
     
     <code class="html"><pre>&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;en&quot;&gt;
@@ -64,10 +72,10 @@
 &lt;body&gt;
   &lt;ol&gt;
     &lt;li&gt;
-      &lt;h2&gt;Write presentations with simple HTML5&lt;/h2&gt;
-      &lt;code&gt;&lt;pre&gt;
-        ...
-      &lt;/pre&gt;&lt;/code&gt;
+      Slide 1
+    &lt;/li&gt;
+    &lt;li&gt;
+      Slide 2
     &lt;/li&gt;
   &lt;/ol&gt;
 &lt;/body&gt;
@@ -75,32 +83,45 @@
   </li>
   
   <li>
-    <h2>Keep everyone in sync with Presenter Follow</h2>
-    
-    <p>Audience members can navigate slides at will and rejoin you as they please</p>
-  </li>
-  
-  <li>
-    <h2>Theme it however you like</h2>
+    <h2>Modular == Themeable</h2>
     
     <ul>
       <li>Squeenote's opinionated (but simple) markup lets you apply your own styles and transitions.</li>
-      <li>You can even override the Squeenote Bar's styles if you so choose</li>
-      <li>Squeenote's default theme uses CSS3 transitions for animation</li>
-      <li>Squeenote publishes events that your theme can use for transitions and styling.</li>
+      <li>Default theme uses CSS3 transitions for animation.</li>
+      <li>Squeenote publishes events that you can use for transitions and styling.</li>
+      <li>Since a presentation is just an HTML file, themes are just CSS and Javascript.</li>
     </ul>
   </li>
   
   <li>
-    <h2>Deploy a presentation for remote viewing, or run it locally for a small crowd</h2>
+    <h2>Modular == Hackable</h2>
     
-    <code class="bash"><pre>node squeenote.node.js -f mypresentation.html -p mypresenterpassword -P 8080</pre></code>
+    <ul>
+      <li>Squeenote's classes are replaceable on a per-presentation basis.</li>
+      <li><pre>squeenote.Server</pre> is the <a href="http://nodejs.org">Node.js</a> application.</li>
+      <li><pre>squeenote.Presentation</pre> maintains the server connection and dispatches all control events.</li>
+      <li><pre>squeenote.UI</pre> renders the control bar and dispatches all interaction events.</li>
+      <li><pre>squeenote.Device</pre> provides support for identifying touch devices.</li>
+    </ul>
+  </li>
+  
+  <li>
+    <h2>Designed for microdeployment</h2>
+    
+    <ul>
+      <li><pre>squeenote.Server</pre> is intended to be deployed for a short time while you give your presentation.</li>
+      <li>Run it locally over venue wifi for a small crowd...</li>
+      <li>... or deploy it remotely, include a video/audio stream in your presentation file, and deliver your whole presentation over the web.</li>
+    </ul>
   </li>
 
   <li>
-    <h2>Upload them as static files for later viewing</h2>
+    <h2>Designed for archival</h2>
     
-    <p>All static file URLs are still valid</p>
+    <ul>
+      <li>All CSS, Javascript and other assets use paths that are safe for delivery as static files.</li>
+      <li>Upload your presentation to any static server and Squeenote will run in "presenter offline" mode.</li>
+    </ul>
   </li>
 
   <li>

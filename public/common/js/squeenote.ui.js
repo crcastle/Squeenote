@@ -8,7 +8,7 @@ squeenote.UI.prototype = {
   "presentation": null,
   "dispatcher": null,
   "presenter_controls_toggle_keycode": 187, // Equals key
-  "previous_slide_keycode": 37, // Left key
+  "prev_slide_keycode": 37, // Left key
   "next_slide_keycode": 39, // Right key
   "authenticated_as_presenter": false,
   "ui_wrapper": null,
@@ -72,13 +72,13 @@ squeenote.UI.prototype = {
     target.prepend(
       "<section class=\"client_controls\">\
           <a class=\"follow_presenter_enabled disable_presenter_follow\">\
-            <span class=\"presenter_online\" style=\"display: none;\"> Presenter follow enabled.</span>\
+            <span class=\"presenter_online\" style=\"display: none;\">Unfollow presenter</span>\
             <span class=\"presenter_offline\">Presenter is offline.</span>\
           </a>\
-          <a class=\"follow_presenter_disabled enable_presenter_follow\">Presenter follow disabled.\
-            <span class=\"presenter_online\" style=\"display: none;\">Presenter is on slide <span class=\"presenter_slide_number\">X</span>.</span>\
+          <span class=\"follow_presenter_disabled\">\
+            <a class=\"presenter_online enable_presenter_follow\" style=\"display: none;\">Rejoin presenter at slide <span class=\"presenter_slide_number\">X</span></a>\
             <span class=\"presenter_offline\">Presenter is offline.</span>\
-          </a>\
+          </span>\
        </section>"
     );
     $(".enable_presenter_follow").click(function(event) {
@@ -101,7 +101,7 @@ squeenote.UI.prototype = {
             <input id=\"presenter_password\" type=\"password\" value=\"\" />\
           </form>\
           <section class=\"presenter_controls_enabled\">\
-            Presenter mode <a class=\"disable_presenter_mode\">Sign off presenter</a>\
+            Presenter mode <a class=\"disable_presenter_mode\">Sign off</a>\
           </section>\
        </section>"
     );
@@ -146,6 +146,7 @@ squeenote.UI.prototype = {
     })
     dispatcher.bind("failedAuthenticationAsPresenter.squeenote", function(event) {
       event.preventDefault();
+      $("#presenter_password").val("");
       $(".presenter_controls").effect("shake", {times: 3, distance: 10}, 100);
       $(".presenter_controls").effect("highlight", {color: "#D70005"}, 2000);
     });
@@ -175,15 +176,23 @@ squeenote.UI.prototype = {
   },
   
   "bindClientControlActions": function(dispatcher) {
-    
-    
+    var _instance = this;
+    $(document).bind(this.keyPressEventName(), function(event) {
+       if(event.keyCode == _instance.prev_slide_keycode) {
+         event.preventDefault();
+         _instance.presentation.prevSlide();
+       }
+       if(event.keyCode == _instance.next_slide_keycode) {
+         event.preventDefault();
+         _instance.presentation.nextSlide();
+       }
+    });    
   },
   
   "bindPresenterControlActions": function(dispatcher) {
     var _instance = this;
     // Bind keyboard event
-    $("body").keyup(function(event) {
-      event.preventDefault();
+    $(document).bind(this.keyPressEventName(), function(event) {
       if(_instance.listen_for_presenter_hotkey && event.keyCode == _instance.presenter_controls_toggle_keycode) {
         _instance.togglePresenterAndClientControls(event);
       }    
@@ -206,6 +215,10 @@ squeenote.UI.prototype = {
     intro.animate({opacity: 1, left: 0}, 250);
     outro.animate({opacity: 0, left: -500}, 250);
     this.presenter_controls_shown = !this.presenter_controls_shown;
+  },
+  
+  "keyPressEventName": function() {
+    return (navigator.userAgent.toLowerCase().indexOf("firefox") < 0)? "keyup" : "keypress";
   }
   
 }
