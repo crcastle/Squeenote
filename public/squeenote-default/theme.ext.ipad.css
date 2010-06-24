@@ -14,7 +14,6 @@ body > ol > li.pending {
 	display: none;
 }
 body > ol > li.current {
-	border-color: #333;
 }
 body > ol > li.done {
 	top: 0; left: 0; right: 0;

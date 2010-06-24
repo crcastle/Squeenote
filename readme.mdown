@@ -88,3 +88,4 @@ Squeenote's markup is extremely simple. Simply include an &lt;ol /&gt; tag direc
       </body>
     </html>
   
+<a rel="license" href="http://creativecommons.org/licenses/by/2.0/uk/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by/2.0/uk/80x15.png" /></a><br /><span xmlns:dc="http://purl.org/dc/elements/1.1/" href="http://purl.org/dc/dcmitype/InteractiveResource" property="dc:title" rel="dc:type">Squeenote</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://angryamoeba.co.uk" property="cc:attributionName" rel="cc:attributionURL">Dan Glegg</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/2.0/uk/">Creative Commons Attribution 2.0 UK: England &amp; Wales License</a>.<br />Based on a work at <a xmlns:dc="http://purl.org/dc/elements/1.1/" href="http://github.com/danski/squeenote" rel="dc:source">github.com</a>.
