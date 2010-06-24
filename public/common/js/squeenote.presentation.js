@@ -80,7 +80,7 @@ squeenote.Presentation.prototype = {
   client_slide_index: 0,        // The slide index currently being viewed by the client. Zero-based.
   presenter_slide_index: null,  // The slide index currently being shown by the presenter. Zero-based.
   slide_count: 0,               // The total number of slides in the presentation
-  verbose: true,                // Set console.log output
+  verbose: false,                // Set console.log output
   prev_slide_keycode: 37,       // The left arrow key.
   next_slide_keycode: 39,       // The right arrow key.
   
