@@ -136,9 +136,19 @@ squeenote.Presentation.prototype = {
     // Trigger the ready event for any theme javascript to pick up on.
     $(document).trigger("presentationLoaded.squeenote", this);
     // Default to following the presenter.
+    
+    
+    // Check for a #slide-I anchor and default to zero otherwise.
+    var loc = window.location.href.toString();
+    var bootSlide = 0;
+
     this.startFollowingPresenter();
-  // Reset the slide count. Anything bound to the presentationLoaded event should now be listening for the change.
-    this.showSlide(0);
+    
+    if(loc.indexOf("#slide-") > -1) {
+      this.showSlide(parseInt(loc.split("#slide-")[1]));
+    } else {
+      this.showSlide(0);
+    }
   },
   
   prevSlide: function(index) {
@@ -160,6 +170,14 @@ squeenote.Presentation.prototype = {
     if(client_event) this.stopFollowingPresenter();
     this.jq_presentation.trigger("presentationClientSlideChanged.squeenote", this);
     var i = 0;
+    
+    // Append the slide index to the location
+    var loc = window.location.href.toString();
+    var url = loc.split("#")[0];
+    var anchor = loc.split("#")[1];
+    window.location = url+"#slide-"+index;    
+    
+    // Do the slide iteration
     $(this.jq_slide_selector).each(function() {
       li = $(this);
       li_state = li.attr("data-slide-state");
