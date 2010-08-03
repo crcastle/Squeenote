@@ -32,13 +32,21 @@ $(document).bind("presentationLoaded.squeenote", function(event, presentation) {
   // about it running on every slide switch.
   $(presentation.jq_slide_selector).bind("slideStateChanged.squeenote", function(event, li, state) {
     li = $(li);
-    li.attr("class", state);
     switch(state) {
       case "done":
+        li.addClass("done");
+        li.removeClass("current");
+        li.removeClass("pending");
         break;
       case "current":
+        li.addClass("current");
+        li.removeClass("done");
+        li.removeClass("pending");
         break;
       case "pending":
+        li.addClass("pending");
+        li.removeClass("done");
+        li.removeClass("current");
         break;
     }
   });
