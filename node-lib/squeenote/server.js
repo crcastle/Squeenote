@@ -118,7 +118,6 @@ Server = this.Server = Class({
     broadcast_response = {};
     presenter_authenticated = (message.presenter_password == this.presenter_password);
 
-
     // Sync local state for authenticated messages
     if(message.presenter_password != null) {
       client_response.authentication_attempted = true;
